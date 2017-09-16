@@ -57,5 +57,11 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\NiDump\NiDump.csproj">
+      <Project>{62adede7-c083-4a6a-99c3-9ca95d650ed7}</Project>
+      <Name>NiDump</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
