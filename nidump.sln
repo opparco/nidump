@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.15
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NiDumpScale", "NiDumpScale\NiDumpScale.csproj", "{37F39BD0-4488-455B-9871-C0DB281CB8CA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NiUpdateScale", "NiUpdateScale\NiUpdateScale.csproj", "{C84B2B70-0C84-444D-8CC0-ABC5CE2D79F8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{37F39BD0-4488-455B-9871-C0DB281CB8CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37F39BD0-4488-455B-9871-C0DB281CB8CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37F39BD0-4488-455B-9871-C0DB281CB8CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37F39BD0-4488-455B-9871-C0DB281CB8CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C84B2B70-0C84-444D-8CC0-ABC5CE2D79F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C84B2B70-0C84-444D-8CC0-ABC5CE2D79F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C84B2B70-0C84-444D-8CC0-ABC5CE2D79F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C84B2B70-0C84-444D-8CC0-ABC5CE2D79F8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B81413A2-7ABA-4A12-9F2B-5F4E1E615EC3}
+	EndGlobalSection
+EndGlobal
