@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 
-using SharpDX;
-
 using NiDump;
 
 using ObjectRef = System.Int32;
@@ -129,7 +127,7 @@ namespace NiDumpScale
 
             NiNode node = nodes[node_ref];
 
-            if (!MathUtil.NearEqual(node.local.scale, 1.0f))
+            if (!SharpDX.MathUtil.NearEqual(node.local.scale, 1.0f))
             {
                 Console.Write(GetString(node.name));
                 Console.WriteLine("\t{0:F6}", node.local.scale);
