@@ -4,8 +4,16 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 15.0.26730.15
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NiDumpScale", "NiDumpScale\NiDumpScale.csproj", "{37F39BD0-4488-455B-9871-C0DB281CB8CA}"
+	ProjectSection(ProjectDependencies) = postProject
+		{62ADEDE7-C083-4A6A-99C3-9CA95D650ED7} = {62ADEDE7-C083-4A6A-99C3-9CA95D650ED7}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NiUpdateScale", "NiUpdateScale\NiUpdateScale.csproj", "{C84B2B70-0C84-444D-8CC0-ABC5CE2D79F8}"
+	ProjectSection(ProjectDependencies) = postProject
+		{62ADEDE7-C083-4A6A-99C3-9CA95D650ED7} = {62ADEDE7-C083-4A6A-99C3-9CA95D650ED7}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NiDump", "NiDump\NiDump.csproj", "{62ADEDE7-C083-4A6A-99C3-9CA95D650ED7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +29,10 @@ Global
 		{C84B2B70-0C84-444D-8CC0-ABC5CE2D79F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C84B2B70-0C84-444D-8CC0-ABC5CE2D79F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C84B2B70-0C84-444D-8CC0-ABC5CE2D79F8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{62ADEDE7-C083-4A6A-99C3-9CA95D650ED7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62ADEDE7-C083-4A6A-99C3-9CA95D650ED7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62ADEDE7-C083-4A6A-99C3-9CA95D650ED7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62ADEDE7-C083-4A6A-99C3-9CA95D650ED7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
