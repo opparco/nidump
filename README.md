@@ -1,8 +1,10 @@
 # NiNode Scale Tools
-
 a command line tool for easily porting the scale factor of NiNode.
 
-## How to use
+## Prerequisite
+- .NET Framework 4.5.2
+
+## Useage
 
 ```
 NiDumpScale.exe skeleton.nif
@@ -36,3 +38,15 @@ NiUpdateScale.exe xpmse.nif nodes.txt
 rename out.nif skeleton_female.nif
 ```
 Restriction: CME bone name conversion is not performed.
+
+## Build
+
+### Prerequisite
+- Visual Studio 2017
+- SharpDX 4.0.1
+
+Run MSBuild
+
+## License
+
+MIT License
