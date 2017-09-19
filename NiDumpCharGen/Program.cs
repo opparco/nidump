@@ -85,10 +85,21 @@ namespace NiDumpCharGen
 
             string source_file = args[0];
 
-            Stream stream = File.OpenRead(source_file);
-            var serializer = new DataContractJsonSerializer(typeof(RaceMenuSlot));
-            RaceMenuSlot slot = (RaceMenuSlot)serializer.ReadObject(stream);
-            slot.Dump();
+            FileStream stream = File.OpenRead(source_file);
+            try
+            {
+                var serializer = new DataContractJsonSerializer(typeof(RaceMenuSlot));
+                RaceMenuSlot slot = (RaceMenuSlot)serializer.ReadObject(stream);
+                slot.Dump();
+            }
+            catch (SerializationException ex)
+            {
+                Console.WriteLine("Failed to deserialize. Reason: " + ex.Message);
+            }
+            finally
+            {
+                stream.Close();
+            }
         }
     }
 }
