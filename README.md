@@ -1,5 +1,5 @@
 # NiNode Scale Tools
-a command line tool for easily porting the scale factor of NiNode.
+command line tools for easily porting the scale factor of NiNode.
 
 ## Prerequisite
 - .NET Framework 4.5.2
