@@ -31,7 +31,7 @@ Data\SKSE\Plugins\CharGen\Presets
 ```
 NiTransform.exe skeleton.nif transforms.txt
 ```
-Bake transforms into skeleton.nif.
+Bake transforms into skeleton.nif and create out.nif.
 
 
 ## Concrete example - Porting a skeleton based on Vanilla or XPMS to XPMSE
