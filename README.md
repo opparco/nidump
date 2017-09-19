@@ -71,27 +71,35 @@ nodes.txt:
 name scale
 
 ### ex. Vanilla skeleton_female.nif
+```
 NPC R Hand [RHnd]       0.851680
 NPC L Hand [LHnd]       0.851680
+```
 
 ### The format of NiDumpCharGen.exe output (tab delimited):
 transforms.txt:
 name method value
 
 ### ex. Breast slider
+```
 NPC R Breast    Scale   1.8
 NPC L Breast    Scale   1.8
 NPC R Breast01  Scale   0.5555556
 NPC L Breast01  Scale   0.5555556
+```
 
 ### ex. Breast Sagness/Cleavage slider
+```
 NPC R PreBreast Rotation        0.8660254 -0.5 0 0.5 0.8660254 0 0 0 1
 NPC L PreBreast Rotation        1 0 0 0 0.8660254 0.5 0 -0.5 0.8660254
+```
 
 ### ex. Head Up/Down slider
+```
 CME Neck [Neck] Position        0 0 -0.5
 CME Camera1st [Cam1]    Position        0 0 -0.5
 CME Camera3rd [Cam3]    Position        0 0 -0.5
+```
 
 
 ## ChangeLog
