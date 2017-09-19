@@ -17,6 +17,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NiDump", "NiDump\NiDump.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NiDumpCharGen", "NiDumpCharGen\NiDumpCharGen.csproj", "{17FE3372-F166-43EC-88D4-AB3EBC6D7571}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NiTransform", "NiTransform\NiTransform.csproj", "{397A4D02-69C4-4FC9-90A3-7E1C906D2FCA}"
+	ProjectSection(ProjectDependencies) = postProject
+		{62ADEDE7-C083-4A6A-99C3-9CA95D650ED7} = {62ADEDE7-C083-4A6A-99C3-9CA95D650ED7}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +44,10 @@ Global
 		{17FE3372-F166-43EC-88D4-AB3EBC6D7571}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{17FE3372-F166-43EC-88D4-AB3EBC6D7571}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{17FE3372-F166-43EC-88D4-AB3EBC6D7571}.Release|Any CPU.Build.0 = Release|Any CPU
+		{397A4D02-69C4-4FC9-90A3-7E1C906D2FCA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{397A4D02-69C4-4FC9-90A3-7E1C906D2FCA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{397A4D02-69C4-4FC9-90A3-7E1C906D2FCA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{397A4D02-69C4-4FC9-90A3-7E1C906D2FCA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
