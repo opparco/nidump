@@ -67,7 +67,7 @@ rename out.nif skeleton_female.nif
 ## Format
 
 ### The format of NiDumpScale.exe output (tab delimited):
-nodes.txt:
+
 name scale
 
 ### ex. Vanilla skeleton_female.nif
@@ -77,7 +77,7 @@ NPC L Hand [LHnd]       0.851680
 ```
 
 ### The format of NiDumpCharGen.exe output (tab delimited):
-transforms.txt:
+
 name method value
 
 ### ex. Breast slider
