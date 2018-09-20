@@ -23,12 +23,14 @@ namespace NiDumpShape
             }
         }
     }
+#if false
     // Texture coordinates (u,v). As in OpenGL; image origin is in the lower left corner.
     struct TexCoord
     {
         float u;
         float v;
     }
+#endif
     // List of three vertex indices.
     struct Triangle
     {
@@ -94,15 +96,82 @@ namespace NiDumpShape
         SharpDX.Color4[] vertex_colors;
 
         // The UV texture coordinates. They follow the OpenGL standard: some programs may require you to flip the second coordinate.
-        public TexCoord[] uv_sets;
+        public SharpDX.Vector2[] uv_sets;
 
         // Consistency Flags
         public ushort consistency_flags = 0x0000;  // CT_MUTABLE
         // Unknown.
         public ObjectRef additional_data;
 
+        bool has_uv
+        {
+            get { return (bs_vector_flags & (1)) != 0; }
+        }
+        bool has_tangents
+        {
+            get { return (bs_vector_flags & (1<<12)) != 0; }
+        }
         public override void Read(BinaryReader reader)
         {
+            this.group_id = reader.ReadInt32();
+            this.num_vertices = reader.ReadUInt16();
+            this.keep_flags = reader.ReadByte();
+            this.compress_flags = reader.ReadByte();
+
+            this.has_vertices = reader.ReadByte() != 0;
+            if (has_vertices)
+            {
+                this.vertices = new SharpDX.Vector3[num_vertices];
+                for (int i = 0; i < num_vertices; i++)
+                {
+                    reader.ReadVector3(out vertices[i]);
+                }
+            }
+
+            this.bs_vector_flags = reader.ReadUInt16();
+            this.material_crc = reader.ReadUInt32();
+
+            this.has_normals = reader.ReadByte() != 0;
+            if (has_vertices && has_normals)
+            {
+                this.normals = new SharpDX.Vector3[num_vertices];
+                for (int i = 0; i < num_vertices; i++)
+                {
+                    reader.ReadVector3(out normals[i]);
+                }
+            }
+            if (has_normals && has_tangents)
+            {
+                this.tangents = new SharpDX.Vector3[num_vertices];
+                for (int i = 0; i < num_vertices; i++)
+                {
+                    reader.ReadVector3(out tangents[i]);
+                }
+            }
+            if (has_normals && has_tangents)
+            {
+                this.bitangents = new SharpDX.Vector3[num_vertices];
+                for (int i = 0; i < num_vertices; i++)
+                {
+                    reader.ReadVector3(out bitangents[i]);
+                }
+            }
+
+            reader.ReadVector3(out this.center);
+            this.radius = reader.ReadSingle();
+
+            this.has_vertex_colors = reader.ReadByte() != 0;
+            if (has_vertices && has_vertex_colors)
+            {
+                this.vertex_colors = new SharpDX.Color4[num_vertices];
+            }
+            if (has_vertices && has_uv)
+            {
+                this.uv_sets = new SharpDX.Vector2[num_vertices];
+            }
+
+            this.consistency_flags = reader.ReadUInt16();
+            this.additional_data = reader.ReadInt32();
         }
     }
     // Describes a mesh, built from triangles.
@@ -114,6 +183,8 @@ namespace NiDumpShape
         public override void Read(BinaryReader reader)
         {
             base.Read(reader);
+
+            this.num_triangles = reader.ReadUInt16();
         }
     }
     // Holds mesh data using a list of singular triangles.
@@ -136,18 +207,18 @@ namespace NiDumpShape
         {
             base.Read(reader);
 
-            num_triangle_points = reader.ReadUInt32();
-            has_triangles = reader.ReadByte() != 0;
+            this.num_triangle_points = reader.ReadUInt32();
+            this.has_triangles = reader.ReadByte() != 0;
             if (has_triangles)
             {
-                triangles = new Triangle[num_triangle_points/3];
+                this.triangles = new Triangle[num_triangle_points/3];
                 for (int i = 0; i < num_triangle_points/3; i++)
                 {
                     triangles[i].Read(reader);
                 }
             }
-            num_match_groups = reader.ReadUInt16();
-            match_groups = new MatchGroup[num_match_groups];
+            this.num_match_groups = reader.ReadUInt16();
+            this.match_groups = new MatchGroup[num_match_groups];
             for (int i = 0; i < num_triangle_points; i++)
             {
                 match_groups[i].Read(reader);
