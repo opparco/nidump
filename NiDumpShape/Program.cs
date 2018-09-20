@@ -49,6 +49,7 @@ namespace NiDumpShape
     abstract class NiObject
     {
         public abstract void Read(BinaryReader reader);
+        public abstract void Dump();
     }
     // Mesh data: vertices, vertex normals, etc.
     abstract class NiGeometryData : NiObject
@@ -96,7 +97,8 @@ namespace NiDumpShape
         SharpDX.Color4[] vertex_colors;
 
         // The UV texture coordinates. They follow the OpenGL standard: some programs may require you to flip the second coordinate.
-        public SharpDX.Vector2[] uv_sets;
+        // TODO: UV Sets
+        public SharpDX.Vector2[] uvs;
 
         // Consistency Flags
         public ushort consistency_flags = 0x0000;  // CT_MUTABLE
@@ -164,14 +166,44 @@ namespace NiDumpShape
             if (has_vertices && has_vertex_colors)
             {
                 this.vertex_colors = new SharpDX.Color4[num_vertices];
+                for (int i = 0; i < num_vertices; i++)
+                {
+                    reader.ReadColor4(out vertex_colors[i]);
+                }
             }
+
             if (has_vertices && has_uv)
             {
-                this.uv_sets = new SharpDX.Vector2[num_vertices];
+                this.uvs = new SharpDX.Vector2[num_vertices];
+                for (int i = 0; i < num_vertices; i++)
+                {
+                    reader.ReadVector2(out uvs[i]);
+                }
             }
 
             this.consistency_flags = reader.ReadUInt16();
             this.additional_data = reader.ReadInt32();
+        }
+
+        public override void Dump()
+        {
+            System.Console.WriteLine("-- NiGeometryData --");
+
+            System.Console.WriteLine("num_vertices:{0}", this.num_vertices);
+            System.Console.WriteLine("has_vertices:{0}", this.has_vertices);
+
+            System.Console.WriteLine("bs_vector_flags:{0:X4}", this.bs_vector_flags);
+
+            System.Console.WriteLine("material_crc:{0:X8}", this.material_crc);
+            System.Console.WriteLine("has_normals:{0}", this.has_normals);
+
+            System.Console.WriteLine("center:{0}", this.center);
+            System.Console.WriteLine("radius:{0}", this.radius);
+
+            System.Console.WriteLine("has_vertex_colors:{0}", this.has_vertex_colors);
+
+            System.Console.WriteLine("consistency_flags:{0:X4}", this.consistency_flags);
+            System.Console.WriteLine("additional_data:{0}", this.additional_data);
         }
     }
     // Describes a mesh, built from triangles.
@@ -185,6 +217,16 @@ namespace NiDumpShape
             base.Read(reader);
 
             this.num_triangles = reader.ReadUInt16();
+            System.Console.WriteLine("num_triangles:{0}", this.num_triangles);
+        }
+
+        public override void Dump()
+        {
+            base.Dump();
+
+            System.Console.WriteLine("-- NiTriBasedGeomData --");
+
+            System.Console.WriteLine("num_triangles:{0}", this.num_triangles);
         }
     }
     // Holds mesh data using a list of singular triangles.
@@ -211,22 +253,29 @@ namespace NiDumpShape
             this.has_triangles = reader.ReadByte() != 0;
             if (has_triangles)
             {
-                this.triangles = new Triangle[num_triangle_points/3];
-                for (int i = 0; i < num_triangle_points/3; i++)
+                this.triangles = new Triangle[num_triangles];
+                for (int i = 0; i < num_triangles; i++)
                 {
                     triangles[i].Read(reader);
                 }
             }
             this.num_match_groups = reader.ReadUInt16();
             this.match_groups = new MatchGroup[num_match_groups];
-            for (int i = 0; i < num_triangle_points; i++)
+            for (int i = 0; i < num_match_groups; i++)
             {
                 match_groups[i].Read(reader);
             }
         }
 
-        public void Dump()
+        public override void Dump()
         {
+            base.Dump();
+
+            System.Console.WriteLine("-- NiTriShapeData --");
+
+            System.Console.WriteLine("num_triangle_points:{0}", this.num_triangle_points);
+            System.Console.WriteLine("has_triangles:{0}", this.has_triangles);
+            System.Console.WriteLine("num_match_groups:{0}", this.num_match_groups);
         }
     }
 
@@ -256,13 +305,43 @@ namespace NiDumpShape
 
         public void Load(Stream source_stream)
         {
-            BinaryReader reader = new BinaryReader(source_stream, System.Text.Encoding.Default);
+            {
+                BinaryReader reader = new BinaryReader(source_stream, System.Text.Encoding.Default);
 
-            header = new NiHeader();
-            header.Read(reader);
+                header = new NiHeader();
+                header.Read(reader);
 
-            header.SetBlocksOffset(source_stream.Position);
-            header.Dump();
+                header.SetBlocksOffset(source_stream.Position);
+                //header.Dump();
+
+                int num_blocks = header.blocks.Length;
+
+                for (int i = 0; i < num_blocks; i++)
+                {
+                    header.blocks[i].Read(reader);
+                }
+            }
+
+            {
+                int bt_NiTriShapeData = header.GetBlockTypeIdxByName("NiTriShapeData");
+
+                int num_blocks = header.blocks.Length;
+
+                for (int i = 0; i < num_blocks; i++)
+                {
+                    if (header.blocks[i].type == bt_NiTriShapeData)
+                    {
+                        using (MemoryStream stream = new MemoryStream(header.blocks[i].data))
+                        {
+                            BinaryReader reader = new BinaryReader(stream, System.Text.Encoding.Default);
+
+                            NiTriShapeData triShapeData = new NiTriShapeData();
+                            triShapeData.Read(reader);
+                            triShapeData.Dump();
+                        }
+                    }
+                }
+            }
         }
     }
 }

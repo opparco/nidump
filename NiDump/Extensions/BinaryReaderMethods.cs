@@ -10,6 +10,13 @@ namespace NiDump
 {
     public static class BinaryReaderMethods
     {
+        public static void ReadVector2(this BinaryReader reader, out Vector2 v)
+        {
+            v = new Vector2();
+            for (int i = 0; i < 2; i++)
+                v[i] = reader.ReadSingle();
+        }
+
         public static void ReadVector3(this BinaryReader reader, out Vector3 v)
         {
             v = new Vector3();
