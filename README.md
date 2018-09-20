@@ -1,6 +1,6 @@
 # NiNode Transform Tools
 
-This is command line tools for easily porting transform parameters of NiNode.
+Command line tools for easily porting transform parameters of NiNode.
 
 ## Prerequisites
 

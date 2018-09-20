@@ -22,6 +22,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NiTransform", "NiTransform\
 		{62ADEDE7-C083-4A6A-99C3-9CA95D650ED7} = {62ADEDE7-C083-4A6A-99C3-9CA95D650ED7}
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NiDumpShape", "NiDumpShape\NiDumpShape.csproj", "{5A100D8D-0BE5-4621-B041-B9EE85568D6D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{62ADEDE7-C083-4A6A-99C3-9CA95D650ED7} = {62ADEDE7-C083-4A6A-99C3-9CA95D650ED7}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,6 +53,10 @@ Global
 		{397A4D02-69C4-4FC9-90A3-7E1C906D2FCA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{397A4D02-69C4-4FC9-90A3-7E1C906D2FCA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{397A4D02-69C4-4FC9-90A3-7E1C906D2FCA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5A100D8D-0BE5-4621-B041-B9EE85568D6D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5A100D8D-0BE5-4621-B041-B9EE85568D6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5A100D8D-0BE5-4621-B041-B9EE85568D6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5A100D8D-0BE5-4621-B041-B9EE85568D6D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

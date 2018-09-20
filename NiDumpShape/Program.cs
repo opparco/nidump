@@ -165,7 +165,7 @@ namespace NiDumpShape
         {
             if (args.Length != 1)
             {
-                System.Console.WriteLine("Usage: nidump <nif file>");
+                System.Console.WriteLine("Usage: NiDumpShape <nif file>");
                 return;
             }
 
