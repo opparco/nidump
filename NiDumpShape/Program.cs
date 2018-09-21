@@ -48,11 +48,13 @@ namespace NiDumpShape
 
             {
                 int bt_NiTriShapeData = header.GetBlockTypeIdxByName("NiTriShapeData");
+                int bt_BSShaderTextureSet = header.GetBlockTypeIdxByName("BSShaderTextureSet");
 
                 int num_blocks = header.blocks.Length;
 
                 for (int i = 0; i < num_blocks; i++)
                 {
+#if false
                     if (header.blocks[i].type == bt_NiTriShapeData)
                     {
                         using (MemoryStream stream = new MemoryStream(header.blocks[i].data))
@@ -62,6 +64,18 @@ namespace NiDumpShape
                             NiTriShapeData triShapeData = new NiTriShapeData();
                             triShapeData.Read(reader);
                             triShapeData.Dump();
+                        }
+                    }
+#endif
+                    if (header.blocks[i].type == bt_BSShaderTextureSet)
+                    {
+                        using (MemoryStream stream = new MemoryStream(header.blocks[i].data))
+                        {
+                            BinaryReader reader = new BinaryReader(stream, System.Text.Encoding.Default);
+
+                            BSShaderTextureSet shaderTextureSet = new BSShaderTextureSet();
+                            shaderTextureSet.Read(reader);
+                            shaderTextureSet.Dump();
                         }
                     }
                 }

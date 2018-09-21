@@ -629,6 +629,44 @@ namespace NiDump
         }
     }
 
+    // Bethesda-specific Texture Set.
+    public class BSShaderTextureSet : NiObject
+    {
+        public int num_textures = 6;
+        public string[] textures;
+
+        public override void Read(BinaryReader reader)
+        {
+            this.num_textures = reader.ReadInt32();
+            this.textures = new string[num_textures];
+            for (int i = 0; i < num_textures; i++)
+            {
+                this.textures[i] = reader.ReadSizedString();
+            }
+        }
+
+        public override void Dump()
+        {
+            System.Console.WriteLine("-- BSShaderTextureSet --");
+
+            System.Console.WriteLine("num_textures:{0}", this.num_textures);
+            /**
+            0: Diffuse
+            1: Normal/Gloss
+            2: Glow(SLSF2_Glow_Map)/Skin/Hair/Rim light(SLSF2_Rim_Lighting)
+            3: Height/Parallax
+            4: Environment
+            5: Environment Mask
+            6: Subsurface for Multilayer Parallax
+            7: Back Lighting Map (SLSF2_Back_Lighting)
+            */
+            for (int i = 0; i < num_textures; i++)
+            {
+                System.Console.WriteLine("{0}: {1}", i, this.textures[i]);
+            }
+        }
+    }
+
     // Abstract base class for NiObjects that support names, extra data, and time controllers.
     public abstract class NiObjectNET : NiObject
     {
