@@ -3,6 +3,9 @@ using NiDump;
 
 namespace NiDumpShape
 {
+    using ObjectRef = System.Int32;
+    using StringRef = System.Int32;
+
     class Program
     {
         public static void Main(string[] args)
@@ -19,8 +22,6 @@ namespace NiDumpShape
             program.Load(source_file);
         }
 
-        NiHeader header;
-
         public void Load(string source_file)
         {
             using (Stream source_stream = File.OpenRead(source_file))
@@ -29,57 +30,74 @@ namespace NiDumpShape
 
         public void Load(Stream source_stream)
         {
+            NiHeader header = GetHeader(source_stream);
+
+            int bt_NiTriShapeData = header.GetBlockTypeIdxByName("NiTriShapeData");
+            int bt_BSShaderTextureSet = header.GetBlockTypeIdxByName("BSShaderTextureSet");
+            int bt_NiSkinInstance = header.GetBlockTypeIdxByName("NiSkinInstance");
+
+            int num_blocks = header.blocks.Length;
+
+            for (int i = 0; i < num_blocks; i++)
             {
-                BinaryReader reader = new BinaryReader(source_stream, System.Text.Encoding.Default);
-
-                header = new NiHeader();
-                header.Read(reader);
-
-                header.SetBlocksOffset(source_stream.Position);
-                //header.Dump();
-
-                int num_blocks = header.blocks.Length;
-
-                for (int i = 0; i < num_blocks; i++)
+                if (header.blocks[i].type == bt_NiTriShapeData)
                 {
-                    header.blocks[i].Read(reader);
+                    NiTriShapeData triShapeData = GetObject<NiTriShapeData>(header, i);
+                    triShapeData.Dump();
                 }
-            }
-
-            {
-                int bt_NiTriShapeData = header.GetBlockTypeIdxByName("NiTriShapeData");
-                int bt_BSShaderTextureSet = header.GetBlockTypeIdxByName("BSShaderTextureSet");
-
-                int num_blocks = header.blocks.Length;
-
-                for (int i = 0; i < num_blocks; i++)
+                if (header.blocks[i].type == bt_BSShaderTextureSet)
                 {
-#if false
-                    if (header.blocks[i].type == bt_NiTriShapeData)
+                    BSShaderTextureSet shaderTextureSet = GetObject<BSShaderTextureSet>(header, i);
+                    shaderTextureSet.Dump();
+                }
+                if (header.blocks[i].type == bt_NiSkinInstance)
+                {
+                    NiSkinInstance skinInstance = GetObject<NiSkinInstance>(header, i);
+                    skinInstance.Dump();
+                    foreach (ObjectRef boneref in skinInstance.bones)
                     {
-                        using (MemoryStream stream = new MemoryStream(header.blocks[i].data))
-                        {
-                            BinaryReader reader = new BinaryReader(stream, System.Text.Encoding.Default);
-
-                            NiTriShapeData triShapeData = new NiTriShapeData();
-                            triShapeData.Read(reader);
-                            triShapeData.Dump();
-                        }
-                    }
-#endif
-                    if (header.blocks[i].type == bt_BSShaderTextureSet)
-                    {
-                        using (MemoryStream stream = new MemoryStream(header.blocks[i].data))
-                        {
-                            BinaryReader reader = new BinaryReader(stream, System.Text.Encoding.Default);
-
-                            BSShaderTextureSet shaderTextureSet = new BSShaderTextureSet();
-                            shaderTextureSet.Read(reader);
-                            shaderTextureSet.Dump();
-                        }
+                        NiNode node = GetObject<NiNode>(header, boneref);
+                        System.Console.WriteLine(header.strings[node.name]);
                     }
                 }
             }
+        }
+
+        //TODO: nif
+
+        static NiHeader GetHeader(Stream source_stream)
+        {
+            BinaryReader reader = new BinaryReader(source_stream, System.Text.Encoding.Default);
+
+            NiHeader header = new NiHeader();
+            header.Read(reader);
+
+            header.SetBlocksOffset(source_stream.Position);
+            //header.Dump();
+
+            int num_blocks = header.blocks.Length;
+
+            for (int i = 0; i < num_blocks; i++)
+            {
+                header.blocks[i].Read(reader);
+            }
+            return header;
+        }
+
+        static T GetObject<T>(NiHeader header, ObjectRef object_ref) where T : NiObject, new()
+        {
+            //TODO: cmp T and header.block_types[object_ref]
+
+            T instance;
+
+            using (MemoryStream stream = new MemoryStream(header.blocks[object_ref].data))
+            {
+                BinaryReader reader = new BinaryReader(stream, System.Text.Encoding.Default);
+
+                instance = new T();
+                instance.Read(reader);
+            }
+            return instance;
         }
     }
 }

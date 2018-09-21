@@ -191,7 +191,7 @@ namespace NiDump
             return idx;
         }
 
-        // 特定の node name を探索する
+        // 特定の string を探索する
         public int GetStringIdxByName(string name)
         {
             int num_strings = this.strings.Length;
