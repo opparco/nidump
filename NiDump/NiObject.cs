@@ -588,7 +588,7 @@ namespace NiDump
         // Do we have triangle data?
         public bool has_triangles;
         // Triangle face data.
-        Triangle[] triangles;
+        public Triangle[] triangles;
 
         // Number of shared normals groups.
         public ushort num_match_groups;
