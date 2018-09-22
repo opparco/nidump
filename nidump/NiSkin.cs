@@ -92,54 +92,130 @@ namespace NiDump
             this.num_bones = reader.ReadUInt16();
             this.num_strips = reader.ReadUInt16();
             this.num_weights_per_vertex = reader.ReadUInt16();
+
             // read bones
+            this.bones = new ushort[num_bones];
             for (int i = 0; i < num_bones; i++)
             {
+                bones[i] = reader.ReadUInt16();
             }
+
+            this.has_vertex_map = reader.ReadByte() != 0;
             if (has_vertex_map)
             {
                 // read vertex map
+                this.vertex_map = new ushort[num_vertices];
                 for (int i = 0; i < num_vertices; i++)
                 {
+                    vertex_map[i] = reader.ReadUInt16();
                 }
             }
+
+            this.has_vertex_weights = reader.ReadByte() != 0;
             if (has_vertex_weights)
             {
                 // read vertex weights
-                for (int i = 0; i < num_vertices; i++)
+                this.vertex_weights = new float[num_vertices * num_weights_per_vertex];
+                for (int i = 0; i < num_vertices * num_weights_per_vertex; i++)
                 {
+                    vertex_weights[i] = reader.ReadSingle();
                 }
             }
+
             // read strip_lengths
+            this.strip_lengths = new ushort[num_strips];
             for (int i = 0; i < num_strips; i++)
             {
+                strip_lengths[i] = reader.ReadUInt16();
             }
+
+            this.has_faces = reader.ReadByte() != 0;
+            if (has_faces)
+            {
+                if (num_strips != 0)
+                {
+                    strips = new ushort[num_strips][];
+                    for (int i = 0; i < num_strips; i++)
+                    {
+                        ushort strip_length = strip_lengths[i];
+                        ushort[] strip = new ushort[strip_length];
+                        for (int j = 0; j < strip_length; j++)
+                        {
+                            strip[j] = reader.ReadUInt16();
+                        }
+                        strips[i] = strip;
+                    }
+                }
+                else
+                {
+                    this.triangles = new Triangle[num_triangles];
+                    for (int i = 0; i < num_triangles; i++)
+                    {
+                        triangles[i] = new Triangle();
+                        triangles[i].Read(reader);
+                    }
+                }
+            }
+
+            this.has_bone_indices = reader.ReadByte() != 0;
             if (has_bone_indices)
             {
                 // read bone_indices
-                for (int i = 0; i < num_vertices; i++)
+                this.bone_indices = new byte[num_vertices * num_weights_per_vertex];
+                for (int i = 0; i < num_vertices * num_weights_per_vertex; i++)
                 {
+                    bone_indices[i] = reader.ReadByte();
                 }
             }
+            this.unknown = reader.ReadUInt16();
         }
 
+        public void Dump()
+        {
+            System.Console.WriteLine("-- SkinPartition --");
+
+            System.Console.WriteLine("num_vertices:{0}", num_vertices);
+            System.Console.WriteLine("num_triangles:{0}", num_triangles);
+            System.Console.WriteLine("num_bones:{0}", num_bones);
+            System.Console.WriteLine("num_strips:{0}", num_strips);
+            System.Console.WriteLine("num_weights_per_vertex:{0}", num_weights_per_vertex);
+
+            System.Console.WriteLine("has_vertex_map:{0}", has_vertex_map);
+            System.Console.WriteLine("has_vertex_weights:{0}", has_vertex_weights);
+            System.Console.WriteLine("has_faces:{0}", has_faces);
+            System.Console.WriteLine("has_bone_indices:{0}", has_bone_indices);
+            System.Console.WriteLine("unknown:{0}", unknown);
+        }
     }
 
     // Skinning data, optimized for hardware skinning. The mesh is partitioned in submeshes such that each vertex of a submesh is influenced only by a limited and fixed number of bones.
     public class NiSkinPartition : NiObject
     {
 
-        uint num_skin_partitions;
+        public uint num_skin_partitions;
         // Skin partition objects.
-        SkinPartition[] skin_partitions;
+        public SkinPartition[] skin_partitions;
 
         public override void Read(BinaryReader reader)
         {
+            this.num_skin_partitions = reader.ReadUInt32();
+            this.skin_partitions = new SkinPartition[num_skin_partitions];
+            for (int i = 0; i < num_skin_partitions; i++)
+            {
+                skin_partitions[i] = new SkinPartition();
+                skin_partitions[i].Read(reader);
+            }
         }
 
         public override void Dump()
         {
             System.Console.WriteLine("-- NiSkinPartition --");
+
+            System.Console.WriteLine("num_skin_partitions:{0}", num_skin_partitions);
+            for (int i = 0; i < num_skin_partitions; i++)
+            {
+                skin_partitions[i].Dump();
+            }
         }
     }
 }
