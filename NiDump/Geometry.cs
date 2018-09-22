@@ -239,4 +239,112 @@ namespace NiDump
             System.Console.WriteLine("num_match_groups:{0}", this.num_match_groups);
         }
     }
+
+    public struct MaterialData
+    {
+
+        uint num_materials;
+        // The name of the material.
+        StringRef[] material_name;
+        // Extra data associated with the material. A value of -1 means the material is the default implementation.
+        int[] material_extra_data;
+        // The index of the currently active material.
+        int active_material;
+        // Whether the materials for this object always needs to be updated before rendering with them.
+        bool material_needs_update;
+
+        public void Read(BinaryReader reader)
+        {
+            this.num_materials = reader.ReadUInt32();
+            this.material_name = new StringRef[num_materials];
+            for (int i = 0; i < num_materials; i++)
+            {
+                this.material_name[i] = reader.ReadInt32();
+            }
+            this.material_extra_data = new int[num_materials];
+            for (int i = 0; i < num_materials; i++)
+            {
+                this.material_extra_data[i] = reader.ReadInt32();
+            }
+            this.active_material = reader.ReadInt32();
+            this.material_needs_update = reader.ReadByte() != 0;
+        }
+
+        public void Dump()
+        {
+            Console.WriteLine("-- MaterialData --");
+
+            Console.WriteLine("num_materials:{0}", num_materials);
+            Console.WriteLine("material_name:{0}", material_name);
+            Console.WriteLine("material_extra_data:{0}", material_extra_data);
+            Console.WriteLine("active_material:{0}", active_material);
+            Console.WriteLine("material_needs_update:{0}", material_needs_update);
+        }
+    }
+
+    // Describes a visible scene element with vertices like a mesh, a particle system, lines, etc.
+    public abstract class NiGeometry : NiAVObject
+    {
+        // Data reference (NiTriShapeData/NiTriStripsData).
+        public ObjectRef data;
+
+        public ObjectRef skin_instance;
+
+        public MaterialData material_data;
+
+        public ObjectRef shader_property;
+
+        public ObjectRef alpha_property;
+
+        public override void Read(BinaryReader reader)
+        {
+            base.Read(reader);
+
+            this.data = reader.ReadInt32();
+            this.skin_instance = reader.ReadInt32();
+            this.material_data = new MaterialData();
+            this.material_data.Read(reader);
+            this.shader_property = reader.ReadInt32();
+            this.alpha_property = reader.ReadInt32();
+        }
+
+        public override void Dump()
+        {
+            Console.WriteLine("-- NiGeometry --");
+
+            Console.WriteLine("data:{0}", data);
+            Console.WriteLine("skin_instance:{0}", skin_instance);
+            material_data.Dump();
+            Console.WriteLine("shader_property:{0}", shader_property);
+            Console.WriteLine("alpha_property:{0}", alpha_property);
+        }
+    }
+
+    // Describes a mesh, built from triangles.
+    public abstract class NiTriBasedGeom : NiGeometry
+    {
+        public override void Read(BinaryReader reader)
+        {
+            base.Read(reader);
+        }
+
+        public override void Dump()
+        {
+            base.Dump();
+        }
+    }
+
+    // A shape node that refers to singular triangle data.
+    public class NiTriShape : NiTriBasedGeom
+    {
+        public override void Read(BinaryReader reader)
+        {
+            base.Read(reader);
+        }
+
+        public override void Dump()
+        {
+            base.Dump();
+        }
+    }
 }
