@@ -50,6 +50,7 @@
     <Compile Include="Animation.cs" />
     <Compile Include="Extensions\BinaryReaderMethods.cs" />
     <Compile Include="Extensions\BinaryWriterMethods.cs" />
+    <Compile Include="Geometry.cs" />
     <Compile Include="NiHeader.cs" />
     <Compile Include="NiObject.cs" />
     <Compile Include="NiSkin.cs" />
