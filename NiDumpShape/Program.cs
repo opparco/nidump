@@ -34,6 +34,7 @@ namespace NiDumpShape
             header.Dump();
 
             int bt_NiTriShapeData = header.GetBlockTypeIdxByName("NiTriShapeData");
+            int bt_BSLightingShaderProperty = header.GetBlockTypeIdxByName("BSLightingShaderProperty");
             int bt_BSShaderTextureSet = header.GetBlockTypeIdxByName("BSShaderTextureSet");
             int bt_NiSkinInstance = header.GetBlockTypeIdxByName("NiSkinInstance");
             int bt_NiSkinPartition = header.GetBlockTypeIdxByName("NiSkinPartition");
@@ -46,6 +47,11 @@ namespace NiDumpShape
                 {
                     NiTriShapeData triShapeData = GetObject<NiTriShapeData>(header, i);
                     triShapeData.Dump();
+                }
+                if (header.blocks[i].type == bt_BSLightingShaderProperty)
+                {
+                    BSLightingShaderProperty lightingShaderProperty = GetObject<BSLightingShaderProperty>(header, i);
+                    lightingShaderProperty.Dump();
                 }
                 if (header.blocks[i].type == bt_BSShaderTextureSet)
                 {

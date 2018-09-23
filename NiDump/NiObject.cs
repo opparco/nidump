@@ -176,9 +176,6 @@ namespace NiDump
 
         public override void Read(BinaryReader reader)
         {
-            //cond: BSLightingShaderProperty
-            //uint skyrim_shader_type;
-
             this.name = reader.ReadInt32();
 
             uint num_extra_data = reader.ReadUInt32();
@@ -191,6 +188,72 @@ namespace NiDump
 
             // ref of NiTimeController
             this.controller = reader.ReadInt32();
+        }
+    }
+
+    // Abstract base class representing all rendering properties. Subclasses are attached to NiAVObjects to control their rendering.
+    public abstract class NiProperty : NiObjectNET
+    {
+        public override void Read(BinaryReader reader)
+        {
+            base.Read(reader);
+        }
+        public override void Dump()
+        {
+        }
+    }
+
+    // Bethesda-specific property.
+    public class BSShaderProperty : NiProperty
+    {
+        public override void Read(BinaryReader reader)
+        {
+            base.Read(reader);
+        }
+        public override void Dump()
+        {
+            base.Dump();
+        }
+    }
+
+    // Bethesda shader property for Skyrim and later.
+    public class BSLightingShaderProperty : BSShaderProperty
+    {
+        // Configures the main shader path
+        public uint shader_type;
+        // Skyrim Shader Flags for setting render/shader options.
+        public uint shader_flags_1;
+        // Skyrim Shader Flags for setting render/shader options.
+        public uint shader_flags_2;
+        // Offset UVs
+        public Vector2 uv_offset;
+        // Offset UV Scale to repeat tiling textures, see above.
+        public Vector2 uv_scale;
+        // Texture Set, can have override in an esm/esp
+        public ObjectRef texture_set;
+
+        public override void Read(BinaryReader reader)
+        {
+            this.shader_type = reader.ReadUInt32();
+
+            base.Read(reader);
+
+            this.shader_flags_1 = reader.ReadUInt32();
+            this.shader_flags_2 = reader.ReadUInt32();
+            reader.ReadVector2(out this.uv_offset);
+            reader.ReadVector2(out this.uv_scale);
+            this.texture_set = reader.ReadInt32();
+        }
+
+        public override void Dump()
+        {
+            base.Dump();
+
+            System.Console.WriteLine("-- BSLightingShaderProperty --");
+            System.Console.WriteLine("shader_type:{0}", shader_type);
+            System.Console.WriteLine("shader_flags_1:{0:X08}", shader_flags_1);
+            System.Console.WriteLine("shader_flags_2:{0:X08}", shader_flags_2);
+            System.Console.WriteLine("texture_set:{0}", texture_set);
         }
     }
 
