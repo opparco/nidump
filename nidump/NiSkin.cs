@@ -44,28 +44,28 @@ namespace NiDump
     public struct SkinPartition
     {
         // Number of vertices in this submesh.
-        ushort num_vertices;
+        public ushort num_vertices;
         // Number of triangles in this submesh.
-        ushort num_triangles;
+        public ushort num_triangles;
         // Number of bones influencing this submesh.
         ushort num_bones;
         // Number of strips in this submesh (zero if not stripped).
         ushort num_strips;
         // Number of weight coefficients per vertex. The Gamebryo engine seems to work well only if this number is equal to 4, even if there are less than 4 influences per vertex.
-        ushort num_weights_per_vertex;
+        public ushort num_weights_per_vertex;
 
         // List of bones.
-        ushort[] bones;
+        public ushort[] bones;
 
         // Do we have a vertex map?
         bool has_vertex_map;
         // Maps the weight/influence lists in this submesh to the vertices in the shape being skinned.
-        ushort[] vertex_map;
+        public ushort[] vertex_map;
 
         // Do we have vertex weights?
         bool has_vertex_weights;
         // The vertex weights.
-        float[] vertex_weights;
+        public SharpDX.Vector4[] vertex_weights;
 
         // The strip lengths.
         ushort[] strip_lengths;
@@ -75,12 +75,12 @@ namespace NiDump
         // The strips.
         ushort[][] strips;
         // The triangles.
-        Triangle[] triangles;
+        public Triangle[] triangles;
 
         // Do we have bone indices?
         bool has_bone_indices;
         // Bone indices, they index into 'bones'.
-        byte[] bone_indices;
+        public uint[] bone_indices;
 
         // Unknown.
         ushort unknown;
@@ -115,10 +115,15 @@ namespace NiDump
             if (has_vertex_weights)
             {
                 // read vertex weights
-                this.vertex_weights = new float[num_vertices * num_weights_per_vertex];
-                for (int i = 0; i < num_vertices * num_weights_per_vertex; i++)
+                this.vertex_weights = new SharpDX.Vector4[num_vertices];
+                float[] tuple = new float[4];
+                for (int i = 0; i < num_vertices; i++)
                 {
-                    vertex_weights[i] = reader.ReadSingle();
+                    for (int x = 0; x < num_weights_per_vertex; x++)
+                    {
+                        tuple[x] = reader.ReadSingle();
+                    }
+                    this.vertex_weights[i] = new SharpDX.Vector4(tuple);
                 }
             }
 
@@ -161,10 +166,15 @@ namespace NiDump
             if (has_bone_indices)
             {
                 // read bone_indices
-                this.bone_indices = new byte[num_vertices * num_weights_per_vertex];
-                for (int i = 0; i < num_vertices * num_weights_per_vertex; i++)
+                this.bone_indices = new uint[num_vertices];
+                byte[] tuple = new byte[4];
+                for (int i = 0; i < num_vertices; i++)
                 {
-                    bone_indices[i] = reader.ReadByte();
+                    for (int x = 0; x < num_weights_per_vertex; x++)
+                    {
+                        tuple[x] = reader.ReadByte();
+                    }
+                    this.bone_indices[i] = System.BitConverter.ToUInt32(tuple, 0);
                 }
             }
             this.unknown = reader.ReadUInt16();
