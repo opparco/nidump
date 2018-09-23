@@ -207,5 +207,48 @@ namespace NiDump
             }
             return idx;
         }
+
+        public static NiHeader Load(string source_file)
+        {
+            using (Stream source_stream = File.OpenRead(source_file))
+            {
+                return Load(source_stream);
+            }
+        }
+
+        public static NiHeader Load(Stream source_stream)
+        {
+            BinaryReader reader = new BinaryReader(source_stream, System.Text.Encoding.Default);
+
+            NiHeader header = new NiHeader();
+            header.Read(reader);
+
+            header.SetBlocksOffset(source_stream.Position);
+            //header.Dump();
+
+            int num_blocks = header.blocks.Length;
+
+            for (int i = 0; i < num_blocks; i++)
+            {
+                header.blocks[i].Read(reader);
+            }
+            return header;
+        }
+
+        public T GetObject<T>(int object_ref) where T : NiObject, new()
+        {
+            //TODO: cmp T and header.block_types[object_ref]
+
+            T instance;
+
+            using (MemoryStream stream = new MemoryStream(this.blocks[object_ref].data))
+            {
+                BinaryReader reader = new BinaryReader(stream, System.Text.Encoding.Default);
+
+                instance = new T();
+                instance.Read(reader);
+            }
+            return instance;
+        }
     }
 }
