@@ -73,6 +73,14 @@ namespace NiDump
             m.M33 = reader.ReadSingle();
         }
 
+        public static void ReadTransform(this BinaryReader reader, out Transform t)
+        {
+            t = new Transform();
+            reader.ReadVector3(out t.translation);
+            reader.ReadMatrix3x3(out t.rotation);
+            t.scale = reader.ReadSingle();
+        }
+
         // read HeaderString
         // value: string (until #10)
         public static string ReadHeaderString(this BinaryReader reader)

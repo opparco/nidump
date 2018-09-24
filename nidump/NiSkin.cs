@@ -1,4 +1,5 @@
 using System.IO;
+using SharpDX;
 
 namespace NiDump
 {
@@ -37,6 +38,79 @@ namespace NiDump
             System.Console.WriteLine("-- NiSkinInstance --");
 
             System.Console.WriteLine("num_bones:{0}", num_bones);
+        }
+    }
+
+    // NiSkinData::BoneData. Skinning data component.
+    public struct BoneData
+    {
+        public Transform transform;
+        public Vector3 bounding_sphere_offset;
+        public float bounding_sphere_radius;
+        // Number of weighted vertices.
+        public ushort num_vertices;
+        // The vertex weights.
+        BoneVertData[] vertex_weights;
+
+        public void Read(BinaryReader reader, bool has_vertex_weights)
+        {
+            reader.ReadTransform(out this.transform);
+            reader.ReadVector3(out this.bounding_sphere_offset);
+            this.bounding_sphere_radius = reader.ReadSingle();
+            this.num_vertices = reader.ReadUInt16();
+            if (has_vertex_weights)
+            {
+                this.vertex_weights = new BoneVertData[num_vertices];
+                for (int i = 0; i < num_vertices; i++)
+                {
+                    vertex_weights[i] = new BoneVertData();
+                    vertex_weights[i].Read(reader);
+                }
+            }
+        }
+    }
+
+
+    // NiSkinData::BoneVertData. A vertex and its weight.
+    public struct BoneVertData
+    {
+        // The vertex index, in the mesh.
+        ushort index;
+        // The vertex weight - between 0.0 and 1.0
+        float weight;
+
+        public void Read(BinaryReader reader)
+        {
+            this.index = reader.ReadUInt16();
+            this.weight = reader.ReadSingle();
+        }
+    }
+
+    public class NiSkinData : NiObject
+    {
+        public Transform transform;
+        // Number of bones.
+        public uint num_bones;
+        // This optionally links a NiSkinPartition for hardware-acceleration information.
+        public bool has_vertex_weights;
+        // Contains offset data for each node that this skin is influenced by.
+        public BoneData[] bone_data;
+
+        public override void Read(BinaryReader reader)
+        {
+            reader.ReadTransform(out this.transform);
+            this.num_bones = reader.ReadUInt32();
+            this.has_vertex_weights = reader.ReadByte() != 0;
+            this.bone_data = new BoneData[num_bones];
+            for (int i = 0; i < num_bones; i++)
+            {
+                bone_data[i] = new BoneData();
+                bone_data[i].Read(reader, has_vertex_weights);
+            }
+        }
+
+        public override void Dump()
+        {
         }
     }
 

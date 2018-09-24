@@ -269,11 +269,7 @@ namespace NiDump
             base.Read(reader);
 
             this.flags = reader.ReadUInt32();
-            this.local = new Transform();
-            //todo: reader.ReadTransform
-            reader.ReadVector3(out local.translation);
-            reader.ReadMatrix3x3(out local.rotation);
-            local.scale = reader.ReadSingle();
+            reader.ReadTransform(out this.local);
 
             // ref of NiCollisionObject
             this.collision_object = reader.ReadInt32();
