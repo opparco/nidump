@@ -131,6 +131,7 @@ namespace NiDump
 
         public abstract void Read(BinaryReader reader);
         public abstract void Dump();
+        public abstract void Write(BinaryWriter writer);
     }
 
     // Bethesda-specific Texture Set.
@@ -169,6 +170,11 @@ namespace NiDump
                 System.Console.WriteLine("{0}: {1}", i, this.textures[i]);
             }
         }
+
+        public override void Write(BinaryWriter writer)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     // Abstract base class for NiObjects that support names, extra data, and time controllers.
@@ -193,6 +199,29 @@ namespace NiDump
             // ref of NiTimeController
             this.controller = reader.ReadInt32();
         }
+
+        public override void Dump()
+        {
+            System.Console.WriteLine("-- NiObjectNET --");
+            System.Console.WriteLine("name:{0}", this.name);
+            System.Console.WriteLine("num_extra_data:{0}", this.extra_data.Length);
+            for (int i = 0; i < this.extra_data.Length; i++)
+            {
+                System.Console.WriteLine("{0}: {1}", i, this.extra_data[i]);
+            }
+            System.Console.WriteLine("controller:{0}", this.controller);
+        }
+
+        public override void Write(BinaryWriter writer)
+        {
+            writer.Write(this.name);
+
+            writer.Write((uint)this.extra_data.Length);
+            foreach (ObjectRef extra_data in this.extra_data)
+                writer.Write(extra_data);
+
+            writer.Write(this.controller);
+        }
     }
 
     // Abstract base class representing all rendering properties. Subclasses are attached to NiAVObjects to control their rendering.
@@ -204,6 +233,7 @@ namespace NiDump
         }
         public override void Dump()
         {
+            base.Dump();
         }
     }
 
@@ -278,6 +308,29 @@ namespace NiDump
             // ref of NiCollisionObject
             this.collision_object = reader.ReadInt32();
         }
+
+        public override void Dump()
+        {
+            base.Dump();
+
+            System.Console.WriteLine("-- NiAVObject --");
+            System.Console.WriteLine("flags:{0}", this.flags);
+            System.Console.WriteLine("local:{0}", this.local);
+            System.Console.WriteLine("collision_object:{0}", this.collision_object);
+        }
+
+        public override void Write(BinaryWriter writer)
+        {
+            base.Write(writer);
+
+            writer.Write(this.flags);
+
+            writer.Write(ref this.local.translation);
+            writer.Write(ref this.local.rotation);
+            writer.Write(this.local.scale);
+
+            writer.Write(this.collision_object);
+        }
     }
 
     // Generic node object for grouping.
@@ -315,24 +368,29 @@ namespace NiDump
 
         public override void Dump()
         {
+            base.Dump();
+
+            System.Console.WriteLine("-- NiNode --");
+
+            System.Console.WriteLine("num_children:{0}", this.children.Length);
+            for (int i = 0; i < this.children.Length; i++)
+            {
+                System.Console.WriteLine("{0}: {1}", i, this.children[i]);
+            }
+
+            if (NiObject.user_version_2 == 130)
+                return;
+
+            System.Console.WriteLine("num_effects:{0}", this.effects.Length);
+            for (int i = 0; i < this.effects.Length; i++)
+            {
+                System.Console.WriteLine("{0}: {1}", i, this.effects[i]);
+            }
         }
 
-        public void Write(BinaryWriter writer)
+        public override void Write(BinaryWriter writer)
         {
-            writer.Write(this.name);
-
-            writer.Write((uint)this.extra_data.Length);
-            foreach (ObjectRef extra_data in this.extra_data)
-                writer.Write(extra_data);
-
-            writer.Write(this.controller);
-            writer.Write(this.flags);
-
-            writer.Write(ref this.local.translation);
-            writer.Write(ref this.local.rotation);
-            writer.Write(this.local.scale);
-
-            writer.Write(this.collision_object);
+            base.Write(writer);
 
             writer.Write((uint)this.children.Length);
             foreach (ObjectRef node in this.children)

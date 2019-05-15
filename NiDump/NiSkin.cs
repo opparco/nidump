@@ -1,4 +1,6 @@
+using System;
 using System.IO;
+
 using SharpDX;
 
 namespace NiDump
@@ -38,6 +40,11 @@ namespace NiDump
             System.Console.WriteLine("-- NiSkinInstance --");
 
             System.Console.WriteLine("num_bones:{0}", num_bones);
+        }
+
+        public override void Write(BinaryWriter writer)
+        {
+            throw new NotImplementedException();
         }
     }
 
@@ -111,6 +118,11 @@ namespace NiDump
 
         public override void Dump()
         {
+        }
+
+        public override void Write(BinaryWriter writer)
+        {
+            throw new NotImplementedException();
         }
     }
 
@@ -300,6 +312,11 @@ namespace NiDump
             {
                 skin_partitions[i].Dump();
             }
+        }
+
+        public override void Write(BinaryWriter writer)
+        {
+            throw new NotImplementedException();
         }
     }
 }

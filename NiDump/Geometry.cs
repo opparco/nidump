@@ -164,6 +164,11 @@ namespace NiDump
             System.Console.WriteLine("consistency_flags:{0:X4}", this.consistency_flags);
             System.Console.WriteLine("additional_data:{0}", this.additional_data);
         }
+
+        public override void Write(BinaryWriter writer)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     // Describes a mesh, built from triangles.
@@ -187,6 +192,13 @@ namespace NiDump
             System.Console.WriteLine("-- NiTriBasedGeomData --");
 
             System.Console.WriteLine("num_triangles:{0}", this.num_triangles);
+        }
+
+        public override void Write(BinaryWriter writer)
+        {
+            base.Write(writer);
+
+            throw new NotImplementedException();
         }
     }
 
@@ -237,6 +249,13 @@ namespace NiDump
             System.Console.WriteLine("num_triangle_points:{0}", this.num_triangle_points);
             System.Console.WriteLine("has_triangles:{0}", this.has_triangles);
             System.Console.WriteLine("num_match_groups:{0}", this.num_match_groups);
+        }
+
+        public override void Write(BinaryWriter writer)
+        {
+            base.Write(writer);
+
+            throw new NotImplementedException();
         }
     }
 
