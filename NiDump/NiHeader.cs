@@ -39,8 +39,10 @@ namespace NiDump
         public string export_info_1;
         public string export_info_2;
 
-        public NiBlock[] blocks;
+        public string max_filepath; // include Fallout 4
+
         public string[] block_types;
+        public NiBlock[] blocks;
         public string[] strings;
 
         public uint unknown_int_2;
@@ -58,6 +60,8 @@ namespace NiDump
             this.creator = reader.ReadShortString();
             this.export_info_1 = reader.ReadShortString();
             this.export_info_2 = reader.ReadShortString();
+            if (this.user_version_2 == 130)
+                this.max_filepath = reader.ReadShortString();
 
             ushort num_block_types = reader.ReadUInt16();
             this.block_types = new string[num_block_types];
@@ -102,6 +106,8 @@ namespace NiDump
             Console.WriteLine("Creator: {0}", this.creator);
             Console.WriteLine("Export Info 1: {0}", this.export_info_1);
             Console.WriteLine("Export Info 2: {0}", this.export_info_2);
+            if (this.user_version_2 == 130)
+                Console.WriteLine("Max Filepath: {0}", this.max_filepath);
 
             Console.WriteLine("#Block Types: {0}", this.block_types.Length);
             foreach (string block_type in this.block_types)
@@ -134,6 +140,8 @@ namespace NiDump
             writer.WriteShortString(this.creator);
             writer.WriteShortString(this.export_info_1);
             writer.WriteShortString(this.export_info_2);
+            if (this.user_version_2 == 130)
+                writer.WriteShortString(this.max_filepath);
 
             writer.Write((ushort)this.block_types.Length);
 

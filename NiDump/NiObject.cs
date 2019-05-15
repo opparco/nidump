@@ -125,6 +125,10 @@ namespace NiDump
     // NiObject : NiGeometryData : NiTriBasedGeomData : NiTriShapeData
     public abstract class NiObject
     {
+        // assign from NiHeader
+        public static uint user_version;
+        public static uint user_version_2;
+
         public abstract void Read(BinaryReader reader);
         public abstract void Dump();
     }
@@ -280,7 +284,7 @@ namespace NiDump
     public class NiNode : NiAVObject
     {
         public ObjectRef[] children;
-        public ObjectRef[] effects;
+        public ObjectRef[] effects; // exclude Fallout 4
 
         public ObjectRef self_ref;
         public NiNode parent;
@@ -296,6 +300,9 @@ namespace NiDump
             {
                 this.children[i] = reader.ReadInt32();
             }
+
+            if (NiObject.user_version_2 == 130)
+                return;
 
             uint num_effects = reader.ReadUInt32();
             this.effects = new ObjectRef[num_effects];
@@ -330,6 +337,9 @@ namespace NiDump
             writer.Write((uint)this.children.Length);
             foreach (ObjectRef node in this.children)
                 writer.Write(node);
+
+            if (NiObject.user_version_2 == 130)
+                return;
 
             writer.Write((uint)this.effects.Length);
             foreach (ObjectRef effect in this.effects)
