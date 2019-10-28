@@ -95,6 +95,7 @@ namespace NiTransform
 
         NiHeader header;
         NiFooter footer;
+        NiNode[] nodes;
 
         public void Load(string source_file)
         {
@@ -109,7 +110,6 @@ namespace NiTransform
             header = new NiHeader();
             header.Read(reader);
 
-            header.SetBlocksOffset(source_stream.Position);
             //header.Dump();
 
             int num_blocks = header.blocks.Length;
@@ -121,19 +121,11 @@ namespace NiTransform
 
             footer = new NiFooter();
             footer.Read(reader);
-            //footer.Dump();
 
-            CreateNodes();
-        }
+            NiObject.user_version = header.user_version;
+            NiObject.user_version_2 = header.user_version_2;
 
-        NiNode[] nodes;
-
-        void CreateNodes()
-        {
             int bt_NiNode = header.GetBlockTypeIdxByName("NiNode");
-            //Console.WriteLine("BT idx 'NiNode': {0}", bt_NiNode);
-
-            int num_blocks = header.blocks.Length;
 
             nodes = new NiNode[num_blocks];
             for (int i = 0; i < num_blocks; i++)
@@ -142,10 +134,9 @@ namespace NiTransform
                 {
                     using (MemoryStream stream = new MemoryStream(header.blocks[i].data))
                     {
-                        BinaryReader reader = new BinaryReader(stream, System.Text.Encoding.Default);
+                        NiNode node = header.GetObject<NiNode>(i);
 
-                        nodes[i] = new NiNode();
-                        nodes[i].Read(reader);
+                        nodes[i] = node;
                     }
                 }
             }
@@ -174,12 +165,14 @@ namespace NiTransform
                 Vector3 position;
                 if (node_positions.TryGetValue(name, out position))
                 {
-                    nodes[i].local.translation = nodes[i].local.translation + position;
+                    //nodes[i].local.translation = nodes[i].local.translation + position;
+                    nodes[i].local.translation = position;
                 }
                 Matrix3x3 rotation;
                 if (node_rotations.TryGetValue(name, out rotation))
                 {
-                    nodes[i].local.rotation = nodes[i].local.rotation * rotation;
+                    //nodes[i].local.rotation = nodes[i].local.rotation * rotation;
+                    nodes[i].local.rotation = rotation;
                 }
             }
         }

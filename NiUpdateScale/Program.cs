@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 
+using SharpDX;
+
 using NiDump;
 
 using ObjectRef = System.Int32;
@@ -25,15 +27,15 @@ namespace NiUpdateScale
 
             Program program = new Program();
             program.Load(nif_file);
-            program.LoadNodeScales(txt_file);
-            program.UpdateNodeScales();
+            program.LoadNodeTransforms(txt_file);
+            program.UpdateNodeTransforms();
             program.Save("out.nif");
         }
 
-        //map node name to scale factor
-        Dictionary<string, float> node_scales = new Dictionary<string, float>();
+        //map node name to transform
+        Dictionary<string, Transform> node_transforms = new Dictionary<string, Transform>();
 
-        public void LoadNodeScales(string source_file)
+        public void LoadNodeTransforms(string source_file)
         {
             StreamReader reader = new StreamReader(source_file, System.Text.Encoding.Default);
             string line;
@@ -41,15 +43,49 @@ namespace NiUpdateScale
             {
                 string[] tuple = line.Split(new char[] { '\t' });
 
-                if (tuple.Length != 2)
+                if (tuple.Length != 4)
                     continue;
 
                 string name = tuple[0];
-                float scale;
-                if (float.TryParse(tuple[1], out scale))
+                Transform t = new Transform();
                 {
-                    node_scales[name] = scale;
+                    float scale;
+                    if (float.TryParse(tuple[1], out scale))
+                        t.scale = scale;
                 }
+                {
+                    string[] string_values = tuple[2].Split(new char[] { ' ' });
+
+                    if (string_values.Length != 4)
+                        continue;
+
+                    float[] values = new float[4];
+                    for (int i=0; i<4; i++)
+                    {
+                        float value;
+                        if (float.TryParse(string_values[i], out value))
+                            values[i] = value;
+                    }
+                    Quaternion rotation = new Quaternion(values);
+
+                    Matrix3x3.RotationQuaternion(ref rotation, out t.rotation);
+                }
+                {
+                    string[] string_values = tuple[3].Split(new char[] { ' ' });
+
+                    if (string_values.Length != 3)
+                        continue;
+
+                    float[] values = new float[3];
+                    for (int i=0; i<3; i++)
+                    {
+                        float value;
+                        if (float.TryParse(string_values[i], out value))
+                            values[i] = value;
+                    }
+                    t.translation = new Vector3(values);
+                }
+                node_transforms[name] = t;
             }
         }
 
@@ -69,7 +105,6 @@ namespace NiUpdateScale
             header = new NiHeader();
             header.Read(reader);
 
-            header.SetBlocksOffset(source_stream.Position);
             //header.Dump();
 
             int num_blocks = header.blocks.Length;
@@ -116,7 +151,7 @@ namespace NiUpdateScale
             return string_ref != -1 ? header.strings[string_ref] : "(undefined)";
         }
 
-        void UpdateNodeScales()
+        void UpdateNodeTransforms()
         {
             int num_blocks = header.blocks.Length;
 
@@ -126,10 +161,10 @@ namespace NiUpdateScale
                     continue;
 
                 string name = GetString(nodes[i].name);
-                float scale;
-                if (node_scales.TryGetValue(name, out scale))
+                Transform t;
+                if (node_transforms.TryGetValue(name, out t))
                 {
-                    nodes[i].local.scale = scale;
+                    nodes[i].local = t;
                 }
             }
         }

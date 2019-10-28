@@ -85,7 +85,6 @@ namespace NiDumpShape
             NiHeader header = new NiHeader();
             header.Read(reader);
 
-            header.SetBlocksOffset(source_stream.Position);
             //header.Dump();
 
             int num_blocks = header.blocks.Length;

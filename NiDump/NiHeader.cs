@@ -9,7 +9,6 @@ namespace NiDump
     {
         public ushort type;
         public uint size;
-        public long offset;
         public byte[] data;
 
         public void Read(BinaryReader reader)
@@ -115,7 +114,7 @@ namespace NiDump
 
             Console.WriteLine("#Blocks: {0}", this.blocks.Length);
             foreach (NiBlock block in this.blocks)
-                Console.WriteLine("Block Type: {0} Size: {1} Offset: 0x{2:x4}", block.type, block.size, block.offset);
+                Console.WriteLine("Block Type: {0} Size: {1}", block.type, block.size);
 
             //Console.WriteLine("Max String Len: {0}", this.max_string_len);
 
@@ -172,16 +171,6 @@ namespace NiDump
             writer.Write(this.unknown_int_2);
         }
 
-        public long SetBlocksOffset(long offset)
-        {
-            foreach (NiBlock block in this.blocks)
-            {
-                block.offset = offset;
-                offset += block.size;
-            }
-            return offset;
-        }
-
         // 特定の block type を探索する
         public int GetBlockTypeIdxByName(string name)
         {
@@ -231,7 +220,6 @@ namespace NiDump
             NiHeader header = new NiHeader();
             header.Read(reader);
 
-            header.SetBlocksOffset(source_stream.Position);
             //header.Dump();
 
             int num_blocks = header.blocks.Length;
