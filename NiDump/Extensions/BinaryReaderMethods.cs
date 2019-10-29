@@ -45,6 +45,21 @@ namespace NiDump
                 c[i] = reader.ReadSingle();
         }
 
+        public static void ReadHalf2(this BinaryReader reader, out Half2 v)
+        {
+            ushort x = reader.ReadUInt16();
+            ushort y = reader.ReadUInt16();
+            v = new Half2(x, y);
+        }
+
+        public static void ReadHalf3(this BinaryReader reader, out Half3 v)
+        {
+            ushort x = reader.ReadUInt16();
+            ushort y = reader.ReadUInt16();
+            ushort z = reader.ReadUInt16();
+            v = new Half3(x, y, z);
+        }
+
         // order: w x y z
         public static void ReadQuaternion(this BinaryReader reader, out Quaternion q)
         {

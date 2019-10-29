@@ -27,7 +27,7 @@ namespace NiDump
         // Always non-zero.
         public bool has_vertices = true;
         // The mesh vertices.
-        public SharpDX.Vector3[] vertices;
+        public Vector3[] vertices;
 
         //  0: has_uv
         // 12: has_tangents
@@ -37,27 +37,27 @@ namespace NiDump
         // Do we have lighting normals? These are essential for proper lighting: if not present, the model will only be influenced by ambient light.
         public bool has_normals;
         // The lighting normals.
-        public SharpDX.Vector3[] normals;
+        public Vector3[] normals;
         // Tangent vectors.
-        public SharpDX.Vector3[] tangents;
+        public Vector3[] tangents;
         // Bitangent vectors.
-        public SharpDX.Vector3[] bitangents;
+        public Vector3[] bitangents;
 
         // NiBound
         //
         // Center of the bounding box (smallest box that contains all vertices) of the mesh.
-        SharpDX.Vector3 center;
+        Vector3 center;
         // Radius of the mesh: maximal Euclidean distance between the center and all vertices.
         float radius;
 
         // Do we have vertex colors? These are usually used to fine-tune the lighting of the model.
         bool has_vertex_colors;
         // The vertex colors.
-        SharpDX.Color4[] vertex_colors;
+        Color4[] vertex_colors; // float[4]
 
         // The UV texture coordinates. They follow the OpenGL standard: some programs may require you to flip the second coordinate.
         // TODO: UV Sets
-        public SharpDX.Vector2[] uvs;
+        public Vector2[] uvs;
 
         // Consistency Flags
         public ushort consistency_flags = 0x0000;  // CT_MUTABLE
@@ -82,7 +82,7 @@ namespace NiDump
             this.has_vertices = reader.ReadByte() != 0;
             if (has_vertices)
             {
-                this.vertices = new SharpDX.Vector3[num_vertices];
+                this.vertices = new Vector3[num_vertices];
                 for (int i = 0; i < num_vertices; i++)
                 {
                     reader.ReadVector3(out vertices[i]);
@@ -95,7 +95,7 @@ namespace NiDump
             this.has_normals = reader.ReadByte() != 0;
             if (has_vertices && has_normals)
             {
-                this.normals = new SharpDX.Vector3[num_vertices];
+                this.normals = new Vector3[num_vertices];
                 for (int i = 0; i < num_vertices; i++)
                 {
                     reader.ReadVector3(out normals[i]);
@@ -103,7 +103,7 @@ namespace NiDump
             }
             if (has_normals && has_tangents)
             {
-                this.tangents = new SharpDX.Vector3[num_vertices];
+                this.tangents = new Vector3[num_vertices];
                 for (int i = 0; i < num_vertices; i++)
                 {
                     reader.ReadVector3(out tangents[i]);
@@ -111,7 +111,7 @@ namespace NiDump
             }
             if (has_normals && has_tangents)
             {
-                this.bitangents = new SharpDX.Vector3[num_vertices];
+                this.bitangents = new Vector3[num_vertices];
                 for (int i = 0; i < num_vertices; i++)
                 {
                     reader.ReadVector3(out bitangents[i]);
@@ -124,7 +124,7 @@ namespace NiDump
             this.has_vertex_colors = reader.ReadByte() != 0;
             if (has_vertices && has_vertex_colors)
             {
-                this.vertex_colors = new SharpDX.Color4[num_vertices];
+                this.vertex_colors = new Color4[num_vertices];
                 for (int i = 0; i < num_vertices; i++)
                 {
                     reader.ReadColor4(out vertex_colors[i]);
@@ -133,7 +133,7 @@ namespace NiDump
 
             if (has_vertices && has_uv)
             {
-                this.uvs = new SharpDX.Vector2[num_vertices];
+                this.uvs = new Vector2[num_vertices];
                 for (int i = 0; i < num_vertices; i++)
                 {
                     reader.ReadVector2(out uvs[i]);
@@ -229,6 +229,7 @@ namespace NiDump
                 this.triangles = new Triangle[num_triangles];
                 for (int i = 0; i < num_triangles; i++)
                 {
+                    triangles[i] = new Triangle();
                     triangles[i].Read(reader);
                 }
             }
@@ -236,6 +237,7 @@ namespace NiDump
             this.match_groups = new MatchGroup[num_match_groups];
             for (int i = 0; i < num_match_groups; i++)
             {
+                match_groups[i] = new MatchGroup();
                 match_groups[i].Read(reader);
             }
         }
@@ -364,6 +366,187 @@ namespace NiDump
         public override void Dump()
         {
             base.Dump();
+        }
+    }
+
+    public class BSVertexDesc
+    {
+        public byte vf1;
+        public byte vf2;
+        public byte vf3;
+        public byte vf4;
+        public byte vf5;
+        public byte vf6;
+        public byte vf7;
+        public byte vf8;
+
+        public void Read(BinaryReader reader)
+        {
+            this.vf1 = reader.ReadByte();
+            this.vf2 = reader.ReadByte();
+            this.vf3 = reader.ReadByte();
+            this.vf4 = reader.ReadByte();
+            this.vf5 = reader.ReadByte();
+            this.vf6 = reader.ReadByte();
+            this.vf7 = reader.ReadByte();
+            this.vf8 = reader.ReadByte();
+        }
+    }
+
+    public class BSVertexData
+    {
+        // cond: vertex
+        public Half3 vertex;
+        // cond: vertex
+        public Half bitangent_x; // not byte
+
+        // cond: uvs
+        public Half2 uv;
+
+        // cond: normals
+        //public ByteVector3 normal;
+        public byte normal_x;
+        public byte normal_y;
+        public byte normal_z;
+        // cond: normals
+        public byte bitangent_y;
+
+        // cond: normals && tangents
+        //public ByteVector3 tangent;
+        public byte tangent_x;
+        public byte tangent_y;
+        public byte tangent_z;
+        // cond: normals && tangents
+        public byte bitangent_z;
+
+        // cond: colors
+        public ColorBGRA vertex_colors; // byte[4]
+
+        // cond: skinned
+        public Half[] bone_weights;
+        public byte[] bone_indices;
+
+        public void Read(BinaryReader reader)
+        {
+            reader.ReadHalf3(out this.vertex);
+            this.bitangent_x = new Half(reader.ReadUInt16());
+
+            reader.ReadHalf2(out this.uv);
+
+            this.normal_x = reader.ReadByte();
+            this.normal_y = reader.ReadByte();
+            this.normal_z = reader.ReadByte();
+            this.bitangent_y = reader.ReadByte();
+
+            this.tangent_x = reader.ReadByte();
+            this.tangent_y = reader.ReadByte();
+            this.tangent_z = reader.ReadByte();
+            this.bitangent_z = reader.ReadByte();
+
+            //TODO: vertex_colors
+
+            this.bone_weights = new Half[4];
+            for (int i = 0; i < 4; i++)
+            {
+                bone_weights[i] = new Half(reader.ReadUInt16());
+            }
+            this.bone_indices = new byte[4];
+            for (int i = 0; i < 4; i++)
+            {
+                bone_indices[i] = reader.ReadByte();
+            }
+        }
+
+        public void Dump()
+        {
+            Console.WriteLine("-- BSVertexData --");
+
+            Console.WriteLine("bone_weights:");
+            for (int i = 0; i < 4; i++)
+            {
+                Console.WriteLine("{0} {1}", i, bone_weights[i]);
+            }
+            Console.WriteLine("bone_indices:");
+            for (int i = 0; i < 4; i++)
+            {
+                Console.WriteLine("{0} {1}", i, bone_indices[i]);
+            }
+        }
+    }
+
+    public class BSTriShape : NiAVObject
+    {
+        // NiBound
+        //
+        // Center of the bounding box (smallest box that contains all vertices) of the mesh.
+        public Vector3 center;
+        // Radius of the mesh: maximal Euclidean distance between the center and all vertices.
+        public float radius;
+
+        public ObjectRef skin;
+        public ObjectRef shader_property;
+        public ObjectRef alpha_property;
+
+        public BSVertexDesc vertex_desc;
+
+        public uint num_triangles;
+        public ushort num_vertices;
+        public uint data_size;
+
+        public BSVertexData[] vertex_data;
+        public Triangle[] triangles;
+
+        public override void Read(BinaryReader reader)
+        {
+            base.Read(reader);
+
+            reader.ReadVector3(out this.center);
+            this.radius = reader.ReadSingle();
+
+            this.skin = reader.ReadInt32();
+            this.shader_property = reader.ReadInt32();
+            this.alpha_property = reader.ReadInt32();
+            this.vertex_desc = new BSVertexDesc();
+            this.vertex_desc.Read(reader);
+            this.num_triangles = reader.ReadUInt32();
+            this.num_vertices = reader.ReadUInt16();
+            this.data_size = reader.ReadUInt32();
+
+            if (data_size != 0)
+            {
+                this.vertex_data = new BSVertexData[num_vertices];
+                for (int i = 0; i < num_vertices; i++)
+                {
+                    vertex_data[i] = new BSVertexData();
+                    vertex_data[i].Read(reader);
+                }
+                this.triangles = new Triangle[num_triangles];
+                for (int i = 0; i < num_triangles; i++)
+                {
+                    triangles[i] = new Triangle();
+                    triangles[i].Read(reader);
+                }
+            }
+        }
+
+        public override void Dump()
+        {
+            base.Dump();
+
+            Console.WriteLine("-- BSTriShape --");
+
+            Console.WriteLine("skin:{0}", skin);
+            Console.WriteLine("shader_property:{0}", shader_property);
+            Console.WriteLine("alpha_property:{0}", alpha_property);
+            Console.WriteLine("vertex_desc:{0}", vertex_desc);
+            Console.WriteLine("num_triangles:{0}", num_triangles);
+            Console.WriteLine("num_vertices:{0}", num_vertices);
+            Console.WriteLine("data_size:{0}", data_size);
+
+            if (data_size != 0)
+            {
+                vertex_data[0].Dump();
+            }
         }
     }
 }
