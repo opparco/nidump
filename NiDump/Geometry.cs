@@ -391,6 +391,18 @@ namespace NiDump
             this.vf7 = reader.ReadByte();
             this.vf8 = reader.ReadByte();
         }
+
+        public void Write(BinaryWriter writer)
+        {
+            writer.Write(vf1);
+            writer.Write(vf2);
+            writer.Write(vf3);
+            writer.Write(vf4);
+            writer.Write(vf5);
+            writer.Write(vf6);
+            writer.Write(vf7);
+            writer.Write(vf8);
+        }
     }
 
     public class BSVertexData
@@ -472,6 +484,35 @@ namespace NiDump
                 Console.WriteLine("{0} {1}", i, bone_indices[i]);
             }
         }
+
+        public void Write(BinaryWriter writer)
+        {
+            writer.Write(ref this.vertex);
+            writer.Write(this.bitangent_x.RawValue);
+
+            writer.Write(ref this.uv);
+
+            writer.Write(this.normal_x);
+            writer.Write(this.normal_y);
+            writer.Write(this.normal_z);
+            writer.Write(this.bitangent_y);
+
+            writer.Write(this.tangent_x);
+            writer.Write(this.tangent_y);
+            writer.Write(this.tangent_z);
+            writer.Write(this.bitangent_z);
+
+            //TODO: vertex_colors
+
+            for (int i = 0; i < 4; i++)
+            {
+                writer.Write(bone_weights[i].RawValue);
+            }
+            for (int i = 0; i < 4; i++)
+            {
+                writer.Write(bone_indices[i]);
+            }
+        }
     }
 
     public class BSTriShape : NiAVObject
@@ -546,6 +587,34 @@ namespace NiDump
             if (data_size != 0)
             {
                 vertex_data[0].Dump();
+            }
+        }
+
+        public override void Write(BinaryWriter writer)
+        {
+            base.Write(writer);
+
+            writer.Write(ref this.center);
+            writer.Write(this.radius);
+
+            writer.Write(this.skin);
+            writer.Write(this.shader_property);
+            writer.Write(this.alpha_property);
+            this.vertex_desc.Write(writer);
+            writer.Write(this.num_triangles);
+            writer.Write(this.num_vertices);
+            writer.Write(this.data_size);
+
+            if (data_size != 0)
+            {
+                for (int i = 0; i < num_vertices; i++)
+                {
+                    vertex_data[i].Write(writer);
+                }
+                for (int i = 0; i < num_triangles; i++)
+                {
+                    triangles[i].Write(writer);
+                }
             }
         }
     }

@@ -1,4 +1,10 @@
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+
+using SharpDX;
+
 using NiDump;
 
 namespace NiDumpShape
@@ -20,7 +26,13 @@ namespace NiDumpShape
 
             Program program = new Program();
             program.Load(source_file);
+            program.UpdateTriShapes();
+            program.Save("out.nif");
         }
+
+        NiHeader header;
+        NiFooter footer;
+        Dictionary<ObjectRef, BSTriShape> triShapes;
 
         public void Load(string source_file)
         {
@@ -30,8 +42,25 @@ namespace NiDumpShape
 
         public void Load(Stream source_stream)
         {
-            NiHeader header = GetHeader(source_stream);
-            header.Dump();
+            BinaryReader reader = new BinaryReader(source_stream, System.Text.Encoding.Default);
+
+            header = new NiHeader();
+            header.Read(reader);
+
+            //header.Dump();
+
+            int num_blocks = header.blocks.Length;
+
+            for (int i = 0; i < num_blocks; i++)
+            {
+                header.blocks[i].Read(reader);
+            }
+
+            footer = new NiFooter();
+            footer.Read(reader);
+
+            NiObject.user_version = header.user_version;
+            NiObject.user_version_2 = header.user_version_2;
 
             int bt_BSTriShape = header.GetBlockTypeIdxByName("BSTriShape");
 #if false
@@ -42,7 +71,7 @@ namespace NiDumpShape
             int bt_NiSkinPartition = header.GetBlockTypeIdxByName("NiSkinPartition");
 #endif
 
-            int num_blocks = header.blocks.Length;
+            triShapes = new Dictionary<ObjectRef, BSTriShape>();
 
             for (int i = 0; i < num_blocks; i++)
             {
@@ -50,6 +79,7 @@ namespace NiDumpShape
                 {
                     BSTriShape triShape = GetObject<BSTriShape>(header, i);
                     triShape.Dump();
+                    triShapes[i] = triShape;
                 }
 #if false
                 if (header.blocks[i].type == bt_NiTriShapeData)
@@ -86,25 +116,77 @@ namespace NiDumpShape
             }
         }
 
-        //TODO: nif
-
-        static NiHeader GetHeader(Stream source_stream)
+        void UpdateTriShapes()
         {
-            BinaryReader reader = new BinaryReader(source_stream, System.Text.Encoding.Default);
+            foreach (ObjectRef triShape_ref in triShapes.Keys)
+            {
+                BSTriShape triShape = triShapes[triShape_ref];
 
-            NiHeader header = new NiHeader();
-            header.Read(reader);
+                if (triShape.data_size != 0)
+                {
+#if false
+                    //SharpDX.Mathematics/BoundingSphere.cs
+                    //
+                    //Find the center of all vertices.
+                    Vector3 center = Vector3.Zero;
+                    foreach (BSVertexData v in triShape.vertex_data)
+                    {
+                        Vector3 co = v.vertex;
+                        Vector3.Add(ref co, ref center, out center);
+                    }
 
-            //header.Dump();
+                    //This is the center of our sphere.
+                    center /= (float)triShape.num_vertices;
+
+                    //Find the radius of the sphere
+                    float radius = 0;
+                    foreach (BSVertexData v in triShape.vertex_data)
+                    {
+                        Vector3 co = v.vertex;
+                        float distance;
+                        Vector3.DistanceSquared(ref center, ref co, out distance);
+                        if (radius < distance)
+                            radius = distance;
+                    }
+
+                    //Find the real distance from the DistanceSquared.
+                    radius = (float)Math.Sqrt(radius);
+
+                    center.Z += 120.0f;
+
+                    triShape.center = center;
+                    triShape.radius = radius;
+#endif
+                }
+            }
+        }
+
+        public void Save(string dest_file)
+        {
+            using (Stream dest_stream = File.Create(dest_file))
+                Save(dest_stream);
+        }
+
+        public void Save(Stream dest_stream)
+        {
+            BinaryWriter writer = new BinaryWriter(dest_stream, System.Text.Encoding.Default);
+
+            header.Write(writer);
 
             int num_blocks = header.blocks.Length;
-
             for (int i = 0; i < num_blocks; i++)
             {
-                header.blocks[i].Read(reader);
+                BSTriShape triShape;
+                if (triShapes.TryGetValue(i, out triShape))
+                    triShape.Write(writer);
+                else
+                    header.blocks[i].Write(writer);
             }
-            return header;
+
+            footer.Write(writer);
         }
+
+        //TODO: nif
 
         static T GetObject<T>(NiHeader header, ObjectRef object_ref) where T : NiObject, new()
         {

@@ -24,6 +24,19 @@ namespace NiDump
             writer.Write(v.Z);
         }
 
+        public static void Write(this BinaryWriter writer, ref Half2 v)
+        {
+            writer.Write(v.X.RawValue);
+            writer.Write(v.Y.RawValue);
+        }
+
+        public static void Write(this BinaryWriter writer, ref Half3 v)
+        {
+            writer.Write(v.X.RawValue);
+            writer.Write(v.Y.RawValue);
+            writer.Write(v.Z.RawValue);
+        }
+
         public static void Write(this BinaryWriter writer, ref Quaternion q)
         {
             writer.Write(q.W);

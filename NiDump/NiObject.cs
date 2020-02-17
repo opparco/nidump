@@ -116,9 +116,16 @@ namespace NiDump
 
         public void Read(BinaryReader reader)
         {
-            v1 = reader.ReadUInt16();
-            v2 = reader.ReadUInt16();
-            v3 = reader.ReadUInt16();
+            this.v1 = reader.ReadUInt16();
+            this.v2 = reader.ReadUInt16();
+            this.v3 = reader.ReadUInt16();
+        }
+
+        public void Write(BinaryWriter writer)
+        {
+            writer.Write(v1);
+            writer.Write(v2);
+            writer.Write(v3);
         }
     }
 
