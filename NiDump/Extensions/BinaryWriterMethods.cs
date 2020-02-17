@@ -57,19 +57,19 @@ namespace NiDump
 
         public static void WriteShortString(this BinaryWriter writer, string value)
         {
-            int len = value.Length + 1;  // include null terminator
+            byte[] bytes = Encoding.Default.GetBytes(value);
+            int len = bytes.Length + 1;  // include null terminator
             writer.Write((byte)len);
-            foreach (byte i in Encoding.Default.GetBytes(value))
-                writer.Write(i);
-
+            writer.Write(bytes);
             writer.Write((byte)0);
         }
 
         public static void WriteSizedString(this BinaryWriter writer, string value)
         {
-            writer.Write((uint)value.Length);
-            foreach (byte i in Encoding.Default.GetBytes(value))
-                writer.Write(i);
+            byte[] bytes = Encoding.Default.GetBytes(value);
+            int len = bytes.Length;
+            writer.Write((uint)len);
+            writer.Write(bytes);
         }
     }
 }
