@@ -98,36 +98,20 @@ namespace NiDump
 
         // read ShortString
         // len: byte
-        // value: array of char (null terminated)
+        // value: array of byte (null terminated)
         public static string ReadShortString(this BinaryReader reader)
         {
             byte len = reader.ReadByte();
-            StringBuilder string_builder = new StringBuilder();
-            while (string_builder.Length != len)
-            {
-                char c = reader.ReadChar();
-                if (c == 0)
-                    break;
-                string_builder.Append(c);
-            }
-            return string_builder.ToString();
+            return Encoding.Default.GetString(reader.ReadBytes((int)len));
         }
 
         // read SizedString
         // len: uint
-        // value: array of char
+        // value: array of byte
         public static string ReadSizedString(this BinaryReader reader)
         {
             uint len = reader.ReadUInt32();
-            StringBuilder string_builder = new StringBuilder();
-            while (string_builder.Length != len)
-            {
-                char c = reader.ReadChar();
-                if (c == 0)
-                    break;
-                string_builder.Append(c);
-            }
-            return string_builder.ToString();
+            return Encoding.Default.GetString(reader.ReadBytes((int)len));
         }
     }
 }
