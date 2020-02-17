@@ -57,6 +57,12 @@ namespace NiDump
 
         public static void WriteShortString(this BinaryWriter writer, string value)
         {
+            if (value == null)
+            {
+                writer.Write((byte)0);
+                writer.Write((byte)0);
+                return;
+            }
             byte[] bytes = Encoding.Default.GetBytes(value);
             int len = bytes.Length + 1;  // include null terminator
             writer.Write((byte)len);

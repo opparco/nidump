@@ -106,7 +106,7 @@ namespace NiDump
             if (len != 0)
                 str = Encoding.Default.GetString(reader.ReadBytes(len - 1));
             else
-                str = "";
+                str = null;
             reader.ReadByte(); // read null terminator
             return str;
         }
