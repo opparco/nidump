@@ -101,8 +101,12 @@ namespace NiDump
         // value: array of byte (null terminated)
         public static string ReadShortString(this BinaryReader reader)
         {
+            string str;
             int len = (int)reader.ReadByte();
-            string str = Encoding.Default.GetString(reader.ReadBytes(len - 1));
+            if (len != 0)
+                str = Encoding.Default.GetString(reader.ReadBytes(len - 1));
+            else
+                str = "";
             reader.ReadByte(); // read null terminator
             return str;
         }
