@@ -63,6 +63,7 @@ namespace NiDumpShape
             NiObject.user_version_2 = header.user_version_2;
 
             int bt_BSTriShape = header.GetBlockTypeIdxByName("BSTriShape");
+            int bt_BSSubIndexTriShape = header.GetBlockTypeIdxByName("BSSubIndexTriShape");
 #if false
             int bt_NiTriShapeData = header.GetBlockTypeIdxByName("NiTriShapeData");
             int bt_BSLightingShaderProperty = header.GetBlockTypeIdxByName("BSLightingShaderProperty");
@@ -78,6 +79,12 @@ namespace NiDumpShape
                 if (header.blocks[i].type == bt_BSTriShape)
                 {
                     BSTriShape triShape = GetObject<BSTriShape>(header, i);
+                    triShape.Dump();
+                    triShapes[i] = triShape;
+                }
+                if (header.blocks[i].type == bt_BSSubIndexTriShape)
+                {
+                    BSSubIndexTriShape triShape = GetObject<BSSubIndexTriShape>(header, i);
                     triShape.Dump();
                     triShapes[i] = triShape;
                 }

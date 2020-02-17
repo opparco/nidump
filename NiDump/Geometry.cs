@@ -618,4 +618,275 @@ namespace NiDump
             }
         }
     }
+
+    public class BSGeometrySubSegmentData
+    {
+        public uint start_index;
+        public uint num_primitives;
+        public uint parent_array_index;
+        public uint unused;
+
+
+        public void Read(BinaryReader reader)
+        {
+            this.start_index = reader.ReadUInt32();
+            this.num_primitives = reader.ReadUInt32();
+            this.parent_array_index = reader.ReadUInt32();
+            this.unused = reader.ReadUInt32();
+        }
+
+        public void Dump()
+        {
+            Console.WriteLine("-- BSGeometrySubSegmentData --");
+
+            Console.WriteLine("Start Index: {0}", this.start_index);
+            Console.WriteLine("Num Primitives: {0}", this.num_primitives);
+            Console.WriteLine("Parent Array Index: {0}", this.parent_array_index);
+            Console.WriteLine("Unused: {0}", this.unused);
+        }
+
+        public void Write(BinaryWriter writer)
+        {
+            writer.Write(this.start_index);
+            writer.Write(this.num_primitives);
+            writer.Write(this.parent_array_index);
+            writer.Write(this.unused);
+        }
+    }
+
+    public class BSGeometrySegmentData
+    {
+        public uint start_index;
+        public uint num_primitives;
+        public uint parent_array_index;
+        public uint num_sub_segments;
+        public BSGeometrySubSegmentData[] sub_segment;
+
+        public void Read(BinaryReader reader)
+        {
+            this.start_index = reader.ReadUInt32();
+            this.num_primitives = reader.ReadUInt32();
+            this.parent_array_index = reader.ReadUInt32();
+            this.num_sub_segments = reader.ReadUInt32();
+
+            sub_segment = new BSGeometrySubSegmentData[this.num_sub_segments];
+            for (int i = 0; i < num_sub_segments; i++)
+            {
+                sub_segment[i] = new BSGeometrySubSegmentData();
+                sub_segment[i].Read(reader);
+            }
+        }
+
+        public void Dump()
+        {
+            Console.WriteLine("-- BSGeometrySegmentData --");
+
+            Console.WriteLine("Start Index: {0}", this.start_index);
+            Console.WriteLine("Num Primitives: {0}", this.num_primitives);
+            Console.WriteLine("Parent Array Index: {0}", this.parent_array_index);
+            Console.WriteLine("Num Sub Segments: {0}", this.num_sub_segments);
+
+            for (int i = 0; i < num_sub_segments; i++)
+            {
+                sub_segment[i].Dump();
+            }
+        }
+
+        public void Write(BinaryWriter writer)
+        {
+            writer.Write(this.start_index);
+            writer.Write(this.num_primitives);
+            writer.Write(this.parent_array_index);
+            writer.Write(this.num_sub_segments);
+
+            for (int i = 0; i < num_sub_segments; i++)
+            {
+                sub_segment[i].Write(writer);
+            }
+        }
+    }
+
+    public class BSGeometryPerSegmentSharedData
+    {
+        public uint user_index;
+        public uint bone_id; // hash of bone name
+        public uint num_cut_offsets;
+        public float[] cut_offsets;
+
+        public void Read(BinaryReader reader)
+        {
+            this.user_index = reader.ReadUInt32();
+            this.bone_id = reader.ReadUInt32();
+            this.num_cut_offsets = reader.ReadUInt32();
+
+            for (int i = 0; i < num_cut_offsets; i++)
+            {
+                this.cut_offsets[i] = reader.ReadSingle();
+            }
+        }
+
+        public void Dump()
+        {
+            Console.WriteLine("-- BSGeometryPerSegmentSharedData --");
+
+            Console.WriteLine("User Index: {0}", this.user_index);
+            Console.WriteLine("Bone Id: {0}", this.bone_id);
+
+            // num_cut_offsets
+            // cut_offsets
+        }
+
+        public void Write(BinaryWriter writer)
+        {
+            writer.Write(this.user_index);
+            writer.Write(this.bone_id);
+            writer.Write(this.num_cut_offsets);
+
+            for (int i = 0; i < num_cut_offsets; i++)
+            {
+                writer.Write(this.cut_offsets[i]);
+            }
+        }
+    }
+
+    public class BSGeometrySegmentSharedData
+    {
+        public uint num_segments;
+        public uint total_segments;
+        public uint[] segment_starts;
+        public BSGeometryPerSegmentSharedData[] per_segment;
+        public string SSF_file;
+
+        public void Read(BinaryReader reader)
+        {
+            this.num_segments = reader.ReadUInt32();
+            this.total_segments = reader.ReadUInt32();
+
+            this.segment_starts = new uint[this.num_segments];
+            for (int i = 0; i < num_segments; i++)
+            {
+                this.segment_starts[i] = reader.ReadUInt32();
+            }
+
+            per_segment = new BSGeometryPerSegmentSharedData[this.total_segments];
+            for (int i = 0; i < total_segments; i++)
+            {
+                per_segment[i] = new BSGeometryPerSegmentSharedData();
+                per_segment[i].Read(reader);
+            }
+
+            this.SSF_file = reader.ReadShortString();
+        }
+
+        public void Dump()
+        {
+            Console.WriteLine("-- BSGeometrySegmentSharedData --");
+
+            Console.WriteLine("Num Segments: {0}", this.num_segments);
+            Console.WriteLine("Total Segments: {0}", this.total_segments);
+
+            Console.WriteLine("Segment Starts:");
+            for (int i = 0; i < num_segments; i++)
+            {
+                Console.WriteLine("{0}", segment_starts[i]);
+            }
+
+            for (int i = 0; i < total_segments; i++)
+            {
+                per_segment[i].Dump();
+            }
+
+            Console.WriteLine("SSF File: {0}", this.SSF_file);
+        }
+
+        public void Write(BinaryWriter writer)
+        {
+            writer.Write(this.num_segments);
+            writer.Write(this.total_segments);
+
+            for (int i = 0; i < num_segments; i++)
+            {
+                writer.Write(this.segment_starts[i]);
+            }
+
+            for (int i = 0; i < total_segments; i++)
+            {
+                per_segment[i].Write(writer);
+            }
+
+            writer.WriteShortString(this.SSF_file);
+        }
+    }
+
+    public class BSSubIndexTriShape : BSTriShape
+    {
+        // cond: data_size > 0
+        public uint num_primitives;
+        // cond: data_size > 0
+        public uint num_segments;
+        // cond: data_size > 0
+        public uint total_segments;
+        // cond: data_size > 0
+        public BSGeometrySegmentData[] segment;
+        // cond: num_segments < total_segments && data_size > 0
+        public BSGeometrySegmentSharedData segment_data;
+
+        public override void Read(BinaryReader reader)
+        {
+            base.Read(reader);
+
+            this.num_primitives = reader.ReadUInt32();
+            this.num_segments = reader.ReadUInt32();
+            this.total_segments = reader.ReadUInt32();
+
+            segment = new BSGeometrySegmentData[this.num_segments];
+            for (int i = 0; i < num_segments; i++)
+            {
+                segment[i] = new BSGeometrySegmentData();
+                segment[i].Read(reader);
+            }
+
+            if (num_segments < total_segments)
+            {
+                segment_data = new BSGeometrySegmentSharedData();
+                segment_data.Read(reader);
+            }
+        }
+
+        public override void Dump()
+        {
+            base.Dump();
+
+            Console.WriteLine("-- BSSubIndexTriShape --");
+
+            Console.WriteLine("Num Primitives: {0}", this.num_primitives);
+            Console.WriteLine("Num Segments: {0}", this.num_segments);
+            Console.WriteLine("Total Segments: {0}", this.total_segments);
+
+            for (int i = 0; i < num_segments; i++)
+            {
+                segment[i].Dump();
+            }
+
+            if (segment_data != null)
+                segment_data.Dump();
+        }
+
+        public override void Write(BinaryWriter writer)
+        {
+            base.Write(writer);
+
+            writer.Write(this.num_primitives);
+            writer.Write(this.num_segments);
+            writer.Write(this.total_segments);
+
+            for (int i = 0; i < num_segments; i++)
+            {
+                segment[i].Write(writer);
+            }
+
+            if (segment_data != null)
+                segment_data.Write(writer);
+        }
+    }
 }
