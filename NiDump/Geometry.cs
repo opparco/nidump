@@ -796,7 +796,7 @@ namespace NiDump
                 per_segment[i].Dump();
             }
 
-            Console.WriteLine("SSF File: {0}", this.SSF_file);
+            Console.WriteLine("SSF File: {0}", this.SSF_file ?? "(null)");
         }
 
         public void Write(BinaryWriter writer)
