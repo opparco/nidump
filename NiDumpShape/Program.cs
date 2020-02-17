@@ -32,7 +32,7 @@ namespace NiDumpShape
 
         NiHeader header;
         NiFooter footer;
-        Dictionary<ObjectRef, BSTriShape> triShapes;
+        Dictionary<ObjectRef, BSSubIndexTriShape> triShapes;
 
         public void Load(string source_file)
         {
@@ -72,20 +72,22 @@ namespace NiDumpShape
             int bt_NiSkinPartition = header.GetBlockTypeIdxByName("NiSkinPartition");
 #endif
 
-            triShapes = new Dictionary<ObjectRef, BSTriShape>();
+            triShapes = new Dictionary<ObjectRef, BSSubIndexTriShape>();
 
             for (int i = 0; i < num_blocks; i++)
             {
+#if false
                 if (header.blocks[i].type == bt_BSTriShape)
                 {
                     BSTriShape triShape = GetObject<BSTriShape>(header, i);
-                    triShape.Dump();
+                    //triShape.Dump();
                     triShapes[i] = triShape;
                 }
+#endif
                 if (header.blocks[i].type == bt_BSSubIndexTriShape)
                 {
                     BSSubIndexTriShape triShape = GetObject<BSSubIndexTriShape>(header, i);
-                    triShape.Dump();
+                    //triShape.Dump();
                     triShapes[i] = triShape;
                 }
 #if false
@@ -127,44 +129,128 @@ namespace NiDumpShape
         {
             foreach (ObjectRef triShape_ref in triShapes.Keys)
             {
-                BSTriShape triShape = triShapes[triShape_ref];
+                BSSubIndexTriShape triShape = triShapes[triShape_ref];
 
-                if (triShape.data_size != 0)
+                if (triShape.data_size == 0)
+                    continue;
+
+                if (triShape.num_segments != 4)
+                    continue;
+
+                if (triShape.total_segments != 4)
+                    continue;
+
+                triShape.total_segments = 6; // +2
                 {
-#if false
-                    //SharpDX.Mathematics/BoundingSphere.cs
-                    //
-                    //Find the center of all vertices.
-                    Vector3 center = Vector3.Zero;
-                    foreach (BSVertexData v in triShape.vertex_data)
-                    {
-                        Vector3 co = v.vertex;
-                        Vector3.Add(ref co, ref center, out center);
-                    }
+                    BSGeometrySegmentData seg = triShape.segment[1];
+                    seg.start_index = 0;
+                    seg.num_primitives = triShape.num_primitives;
 
-                    //This is the center of our sphere.
-                    center /= (float)triShape.num_vertices;
+                    seg.num_sub_segments = 1;
+                    seg.sub_segment = new BSGeometrySubSegmentData[1];
 
-                    //Find the radius of the sphere
-                    float radius = 0;
-                    foreach (BSVertexData v in triShape.vertex_data)
-                    {
-                        Vector3 co = v.vertex;
-                        float distance;
-                        Vector3.DistanceSquared(ref center, ref co, out distance);
-                        if (radius < distance)
-                            radius = distance;
-                    }
+                    // create sub segment
+                    BSGeometrySubSegmentData sub = new BSGeometrySubSegmentData();
+                    sub.start_index = 0;
+                    sub.num_primitives = triShape.num_primitives;
+                    sub.parent_array_index = 1;
 
-                    //Find the real distance from the DistanceSquared.
-                    radius = (float)Math.Sqrt(radius);
-
-                    center.Z += 120.0f;
-
-                    triShape.center = center;
-                    triShape.radius = radius;
-#endif
+                    // attach
+                    seg.sub_segment[0] = sub;
                 }
+
+                {
+                    BSGeometrySegmentData seg = triShape.segment[3];
+                    seg.start_index = triShape.num_primitives * 3;
+                    seg.num_primitives = 0;
+
+                    seg.num_sub_segments = 1;
+                    seg.sub_segment = new BSGeometrySubSegmentData[3];
+
+                    // create sub segment
+                    BSGeometrySubSegmentData sub = new BSGeometrySubSegmentData();
+                    sub.start_index = triShape.num_primitives * 3;
+                    sub.num_primitives = 0;
+                    sub.parent_array_index = 4;
+
+                    // attach
+                    seg.sub_segment[0] = sub;
+                }
+
+                {
+                    triShape.segment_data = new BSGeometrySegmentSharedData();
+                    ref BSGeometrySegmentSharedData seg = ref triShape.segment_data;
+
+                    seg.num_segments = 4;
+                    seg.total_segments = 6;
+
+                    seg.segment_starts = new uint[4];
+                    seg.segment_starts[0] = 0;
+                    seg.segment_starts[1] = 1;
+                    seg.segment_starts[2] = 3;
+                    seg.segment_starts[3] = 4;
+
+                    seg.per_segment = new BSGeometryPerSegmentSharedData[6];
+
+                    seg.per_segment[0] = new BSGeometryPerSegmentSharedData();
+                    seg.per_segment[0].user_index = 0;
+                    seg.per_segment[0].bone_id = 4294967295;
+
+                    seg.per_segment[1] = new BSGeometryPerSegmentSharedData();
+                    seg.per_segment[1].user_index = 1;
+                    seg.per_segment[1].bone_id = 4294967295;
+
+                    seg.per_segment[2] = new BSGeometryPerSegmentSharedData();
+                    seg.per_segment[2].user_index = 32;
+                    seg.per_segment[2].bone_id = 2260150656;
+
+                    seg.per_segment[3] = new BSGeometryPerSegmentSharedData();
+                    seg.per_segment[3].user_index = 2;
+                    seg.per_segment[3].bone_id = 4294967295;
+
+                    seg.per_segment[4] = new BSGeometryPerSegmentSharedData();
+                    seg.per_segment[4].user_index = 3;
+                    seg.per_segment[4].bone_id = 4294967295;
+
+                    seg.per_segment[5] = new BSGeometryPerSegmentSharedData();
+                    seg.per_segment[5].user_index = 33;
+                    seg.per_segment[5].bone_id = 1030112426;
+                }
+                triShape.Dump();
+
+#if false
+                //SharpDX.Mathematics/BoundingSphere.cs
+                //
+                //Find the center of all vertices.
+                Vector3 center = Vector3.Zero;
+                foreach (BSVertexData v in triShape.vertex_data)
+                {
+                    Vector3 co = v.vertex;
+                    Vector3.Add(ref co, ref center, out center);
+                }
+
+                //This is the center of our sphere.
+                center /= (float)triShape.num_vertices;
+
+                //Find the radius of the sphere
+                float radius = 0;
+                foreach (BSVertexData v in triShape.vertex_data)
+                {
+                    Vector3 co = v.vertex;
+                    float distance;
+                    Vector3.DistanceSquared(ref center, ref co, out distance);
+                    if (radius < distance)
+                        radius = distance;
+                }
+
+                //Find the real distance from the DistanceSquared.
+                radius = (float)Math.Sqrt(radius);
+
+                center.Z += 120.0f;
+
+                triShape.center = center;
+                triShape.radius = radius;
+#endif
             }
         }
 
@@ -183,7 +269,7 @@ namespace NiDumpShape
             int num_blocks = header.blocks.Length;
             for (int i = 0; i < num_blocks; i++)
             {
-                BSTriShape triShape;
+                BSSubIndexTriShape triShape;
                 if (triShapes.TryGetValue(i, out triShape))
                     triShape.Write(writer);
                 else

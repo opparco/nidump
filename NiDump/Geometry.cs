@@ -624,7 +624,7 @@ namespace NiDump
         public uint start_index;
         public uint num_primitives;
         public uint parent_array_index;
-        public uint unused;
+        public uint unused = 0;
 
 
         public void Read(BinaryReader reader)
@@ -659,7 +659,7 @@ namespace NiDump
         public uint start_index;
         public uint num_primitives;
         public uint parent_array_index;
-        public uint num_sub_segments;
+        public uint num_sub_segments = 0;
         public BSGeometrySubSegmentData[] sub_segment;
 
         public void Read(BinaryReader reader)
@@ -710,7 +710,7 @@ namespace NiDump
     {
         public uint user_index;
         public uint bone_id; // hash of bone name
-        public uint num_cut_offsets;
+        public uint num_cut_offsets = 0;
         public float[] cut_offsets;
 
         public void Read(BinaryReader reader)
