@@ -623,7 +623,7 @@ namespace NiDump
     {
         public uint start_index;
         public uint num_primitives;
-        public uint parent_array_index;
+        public uint parent_array_index = 0;
         public uint unused = 0;
 
 
@@ -658,7 +658,7 @@ namespace NiDump
     {
         public uint start_index;
         public uint num_primitives;
-        public uint parent_array_index;
+        public uint parent_array_index = 4294967295;
         public uint num_sub_segments = 0;
         public BSGeometrySubSegmentData[] sub_segment;
 

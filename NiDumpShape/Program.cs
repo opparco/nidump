@@ -140,69 +140,69 @@ namespace NiDumpShape
                 if (triShape.data_size == 0)
                     continue;
 
-                if (triShape.num_segments != 4)
+                if (triShape.num_segments != triShape.total_segments)
                 {
-                    Console.WriteLine("num_segments: {0} != 4", triShape.num_segments);
+                    Console.WriteLine("num_segments: {0} != total_segments {1}", triShape.num_segments, triShape.total_segments);
                     continue;
                 }
 
-                if (triShape.total_segments != 4)
+                triShape.num_segments = 2;
+                triShape.total_segments = 4; // +2
+                Array.Resize(ref triShape.segment, 2);
                 {
-                    Console.WriteLine("total_segments: {0} != 4", triShape.total_segments);
-                    continue;
+                    BSGeometrySegmentData seg = new BSGeometrySegmentData();
+                    seg.start_index = 0;
+                    seg.num_primitives = 0;
+
+                    seg.num_sub_segments = 0;
+
+                    triShape.segment[0] = seg;
                 }
 
-                triShape.total_segments = 6; // +2
                 {
-                    BSGeometrySegmentData seg = triShape.segment[1];
+                    BSGeometrySegmentData seg = new BSGeometrySegmentData();
                     seg.start_index = 0;
                     seg.num_primitives = triShape.num_primitives;
 
-                    seg.num_sub_segments = 1;
-                    seg.sub_segment = new BSGeometrySubSegmentData[1];
+                    seg.num_sub_segments = 2;
+                    seg.sub_segment = new BSGeometrySubSegmentData[2];
 
-                    // create sub segment
-                    BSGeometrySubSegmentData sub = new BSGeometrySubSegmentData();
-                    sub.start_index = 0;
-                    sub.num_primitives = triShape.num_primitives;
-                    sub.parent_array_index = 1;
+                    {
+                        // create sub segment
+                        BSGeometrySubSegmentData sub = new BSGeometrySubSegmentData();
+                        sub.start_index = 0;
+                        sub.num_primitives = triShape.num_primitives;
+                        sub.parent_array_index = 1;
 
-                    // attach
-                    seg.sub_segment[0] = sub;
-                }
+                        // attach
+                        seg.sub_segment[0] = sub;
+                    }
 
-                {
-                    BSGeometrySegmentData seg = triShape.segment[3];
-                    seg.start_index = triShape.num_primitives * 3;
-                    seg.num_primitives = 0;
+                    {
+                        // create sub segment
+                        BSGeometrySubSegmentData sub = new BSGeometrySubSegmentData();
+                        sub.start_index = triShape.num_primitives * 3;
+                        sub.num_primitives = 0;
+                        sub.parent_array_index = 1;
 
-                    seg.num_sub_segments = 1;
-                    seg.sub_segment = new BSGeometrySubSegmentData[3];
-
-                    // create sub segment
-                    BSGeometrySubSegmentData sub = new BSGeometrySubSegmentData();
-                    sub.start_index = triShape.num_primitives * 3;
-                    sub.num_primitives = 0;
-                    sub.parent_array_index = 4;
-
-                    // attach
-                    seg.sub_segment[0] = sub;
+                        // attach
+                        seg.sub_segment[1] = sub;
+                    }
+                    triShape.segment[1] = seg;
                 }
 
                 {
                     triShape.segment_data = new BSGeometrySegmentSharedData();
                     ref BSGeometrySegmentSharedData seg = ref triShape.segment_data;
 
-                    seg.num_segments = 4;
-                    seg.total_segments = 6;
+                    seg.num_segments = 2;
+                    seg.total_segments = 4;
 
-                    seg.segment_starts = new uint[4];
+                    seg.segment_starts = new uint[2];
                     seg.segment_starts[0] = 0;
                     seg.segment_starts[1] = 1;
-                    seg.segment_starts[2] = 3;
-                    seg.segment_starts[3] = 4;
 
-                    seg.per_segment = new BSGeometryPerSegmentSharedData[6];
+                    seg.per_segment = new BSGeometryPerSegmentSharedData[4];
 
                     seg.per_segment[0] = new BSGeometryPerSegmentSharedData();
                     seg.per_segment[0].user_index = 0;
@@ -213,20 +213,12 @@ namespace NiDumpShape
                     seg.per_segment[1].bone_id = 4294967295;
 
                     seg.per_segment[2] = new BSGeometryPerSegmentSharedData();
-                    seg.per_segment[2].user_index = 32;
+                    seg.per_segment[2].user_index = 31;
                     seg.per_segment[2].bone_id = 2260150656;
 
                     seg.per_segment[3] = new BSGeometryPerSegmentSharedData();
-                    seg.per_segment[3].user_index = 2;
-                    seg.per_segment[3].bone_id = 4294967295;
-
-                    seg.per_segment[4] = new BSGeometryPerSegmentSharedData();
-                    seg.per_segment[4].user_index = 3;
-                    seg.per_segment[4].bone_id = 4294967295;
-
-                    seg.per_segment[5] = new BSGeometryPerSegmentSharedData();
-                    seg.per_segment[5].user_index = 33;
-                    seg.per_segment[5].bone_id = 1030112426;
+                    seg.per_segment[3].user_index = 30;
+                    seg.per_segment[3].bone_id = 2260150656;
                 }
                 //triShape.Dump();
 
