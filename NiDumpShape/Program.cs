@@ -24,10 +24,16 @@ namespace NiDumpShape
 
             string source_file = args[0];
 
-            Program program = new Program();
-            program.Load(source_file);
-            program.UpdateTriShapes();
-            program.Save("out.nif");
+            string[] files = Directory.GetFiles(source_file, "*.nif");
+            foreach (string file in files)
+            {
+                string dest_file = Path.Combine("output", Path.GetFileName(file));
+                Program program = new Program();
+                Console.WriteLine("processing " + file);
+                program.Load(file);
+                program.UpdateTriShapes();
+                program.Save(dest_file);
+            }
         }
 
         NiHeader header;
@@ -135,10 +141,16 @@ namespace NiDumpShape
                     continue;
 
                 if (triShape.num_segments != 4)
+                {
+                    Console.WriteLine("num_segments: {0} != 4", triShape.num_segments);
                     continue;
+                }
 
                 if (triShape.total_segments != 4)
+                {
+                    Console.WriteLine("total_segments: {0} != 4", triShape.total_segments);
                     continue;
+                }
 
                 triShape.total_segments = 6; // +2
                 {
@@ -216,7 +228,7 @@ namespace NiDumpShape
                     seg.per_segment[5].user_index = 33;
                     seg.per_segment[5].bone_id = 1030112426;
                 }
-                triShape.Dump();
+                //triShape.Dump();
 
 #if false
                 //SharpDX.Mathematics/BoundingSphere.cs
