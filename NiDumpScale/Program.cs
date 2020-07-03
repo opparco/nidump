@@ -29,6 +29,7 @@ namespace NiDumpScale
         }
 
         NiHeader header;
+        NiFooter footer;
         NiNode[] nodes;
         int root_node_ref = -1;
 
@@ -40,25 +41,34 @@ namespace NiDumpScale
 
         public void Load(Stream source_stream)
         {
-            header = GetHeader(source_stream);
+            BinaryReader reader = new BinaryReader(source_stream, System.Text.Encoding.Default);
+
+            header = new NiHeader();
+            header.Read(reader);
+
+            //header.Dump();
+
+            int num_blocks = header.blocks.Length;
+
+            for (int i = 0; i < num_blocks; i++)
+            {
+                header.blocks[i].Read(reader);
+            }
+
+            footer = new NiFooter();
+            footer.Read(reader);
+
             NiObject.user_version = header.user_version;
             NiObject.user_version_2 = header.user_version_2;
 
             int bt_NiNode = header.GetBlockTypeIdxByName("NiNode");
-
-            int num_blocks = header.blocks.Length;
 
             nodes = new NiNode[num_blocks];
             for (int i = 0; i < num_blocks; i++)
             {
                 if (header.blocks[i].type == bt_NiNode)
                 {
-                    using (MemoryStream stream = new MemoryStream(header.blocks[i].data))
-                    {
-                        NiNode node = header.GetObject<NiNode>(i);
-
-                        nodes[i] = node;
-                    }
+                    nodes[i] = header.GetObject<NiNode>(i);
                 }
             }
 
@@ -156,26 +166,6 @@ namespace NiDumpScale
 
             foreach (ObjectRef _node_ref in node.children)
                 DumpNodeRef(_node_ref);
-        }
-
-        //TODO: nif
-
-        static NiHeader GetHeader(Stream source_stream)
-        {
-            BinaryReader reader = new BinaryReader(source_stream, System.Text.Encoding.Default);
-
-            NiHeader header = new NiHeader();
-            header.Read(reader);
-
-            //header.Dump();
-
-            int num_blocks = header.blocks.Length;
-
-            for (int i = 0; i < num_blocks; i++)
-            {
-                header.blocks[i].Read(reader);
-            }
-            return header;
         }
     }
 }

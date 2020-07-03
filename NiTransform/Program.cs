@@ -132,12 +132,7 @@ namespace NiTransform
             {
                 if (header.blocks[i].type == bt_NiNode)
                 {
-                    using (MemoryStream stream = new MemoryStream(header.blocks[i].data))
-                    {
-                        NiNode node = header.GetObject<NiNode>(i);
-
-                        nodes[i] = node;
-                    }
+                    nodes[i] = header.GetObject<NiNode>(i);
                 }
             }
         }
