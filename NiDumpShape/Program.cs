@@ -31,8 +31,8 @@ namespace NiDumpShape
                 Program program = new Program();
                 Console.WriteLine("processing " + file);
                 program.Load(file);
-                program.UpdateTriShapes();
-                program.Save(dest_file);
+                if (program.UpdateTriShapes())
+                    program.Save(dest_file);
             }
         }
 
@@ -131,8 +131,10 @@ namespace NiDumpShape
             }
         }
 
-        void UpdateTriShapes()
+        bool UpdateTriShapes()
         {
+            bool updated = false;
+
             foreach (ObjectRef triShape_ref in triShapes.Keys)
             {
                 BSSubIndexTriShape triShape = triShapes[triShape_ref];
@@ -145,6 +147,7 @@ namespace NiDumpShape
                     Console.WriteLine("num_segments: {0} != total_segments {1}", triShape.num_segments, triShape.total_segments);
                     continue;
                 }
+                updated = true;
 
                 triShape.num_segments = 2;
                 triShape.total_segments = 4; // +2
@@ -256,6 +259,7 @@ namespace NiDumpShape
                 triShape.radius = radius;
 #endif
             }
+            return updated;
         }
 
         public void Save(string dest_file)
