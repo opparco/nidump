@@ -719,6 +719,7 @@ namespace NiDump
             this.bone_id = reader.ReadUInt32();
             this.num_cut_offsets = reader.ReadUInt32();
 
+            this.cut_offsets = new float[this.num_cut_offsets];
             for (int i = 0; i < num_cut_offsets; i++)
             {
                 this.cut_offsets[i] = reader.ReadSingle();
@@ -732,8 +733,11 @@ namespace NiDump
             Console.WriteLine("User Index: {0}", this.user_index);
             Console.WriteLine("Bone Id: {0}", this.bone_id);
 
-            // num_cut_offsets
-            // cut_offsets
+            Console.WriteLine("Num Cut Offsets: {0}", this.num_cut_offsets);
+            for (int i = 0; i < num_cut_offsets; i++)
+            {
+                Console.WriteLine("{0}", this.cut_offsets[i]);
+            }
         }
 
         public void Write(BinaryWriter writer)
@@ -768,11 +772,11 @@ namespace NiDump
                 this.segment_starts[i] = reader.ReadUInt32();
             }
 
-            per_segment = new BSGeometryPerSegmentSharedData[this.total_segments];
+            this.per_segment = new BSGeometryPerSegmentSharedData[this.total_segments];
             for (int i = 0; i < total_segments; i++)
             {
-                per_segment[i] = new BSGeometryPerSegmentSharedData();
-                per_segment[i].Read(reader);
+                this.per_segment[i] = new BSGeometryPerSegmentSharedData();
+                this.per_segment[i].Read(reader);
             }
 
             this.SSF_file = reader.ReadShortString();
@@ -788,12 +792,12 @@ namespace NiDump
             Console.WriteLine("Segment Starts:");
             for (int i = 0; i < num_segments; i++)
             {
-                Console.WriteLine("{0}", segment_starts[i]);
+                Console.WriteLine("{0}", this.segment_starts[i]);
             }
 
             for (int i = 0; i < total_segments; i++)
             {
-                per_segment[i].Dump();
+                this.per_segment[i].Dump();
             }
 
             Console.WriteLine("SSF File: {0}", this.SSF_file ?? "(null)");
@@ -811,7 +815,7 @@ namespace NiDump
 
             for (int i = 0; i < total_segments; i++)
             {
-                per_segment[i].Write(writer);
+                this.per_segment[i].Write(writer);
             }
 
             writer.WriteShortString(this.SSF_file);

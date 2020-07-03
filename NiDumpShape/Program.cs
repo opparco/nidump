@@ -31,8 +31,8 @@ namespace NiDumpShape
                 Program program = new Program();
                 Console.WriteLine("processing " + file);
                 program.Load(file);
-                if (program.UpdateTriShapes())
-                    program.Save(dest_file);
+                //if (program.UpdateTriShapes())
+                //    program.Save(dest_file);
             }
         }
 
@@ -86,14 +86,14 @@ namespace NiDumpShape
                 if (header.blocks[i].type == bt_BSTriShape)
                 {
                     BSTriShape triShape = GetObject<BSTriShape>(header, i);
-                    //triShape.Dump();
+                    triShape.Dump();
                     triShapes[i] = triShape;
                 }
 #endif
                 if (header.blocks[i].type == bt_BSSubIndexTriShape)
                 {
                     BSSubIndexTriShape triShape = GetObject<BSSubIndexTriShape>(header, i);
-                    //triShape.Dump();
+                    triShape.Dump();
                     triShapes[i] = triShape;
                 }
 #if false
