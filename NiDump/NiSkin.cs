@@ -48,8 +48,8 @@ namespace NiDump
         }
     }
 
-    // NiSkinData::BoneData. Skinning data component.
-    public struct BoneData
+    // Skinning data component.
+    public struct NiSkinBoneData
     {
         public Transform transform;
         public Vector3 bounding_sphere_offset;
@@ -57,7 +57,7 @@ namespace NiDump
         // Number of weighted vertices.
         public ushort num_vertices;
         // The vertex weights.
-        BoneVertData[] vertex_weights;
+        NiSkinBoneVertData[] vertex_weights;
 
         public void Read(BinaryReader reader, bool has_vertex_weights)
         {
@@ -67,19 +67,18 @@ namespace NiDump
             this.num_vertices = reader.ReadUInt16();
             if (has_vertex_weights)
             {
-                this.vertex_weights = new BoneVertData[num_vertices];
+                this.vertex_weights = new NiSkinBoneVertData[num_vertices];
                 for (int i = 0; i < num_vertices; i++)
                 {
-                    vertex_weights[i] = new BoneVertData();
+                    vertex_weights[i] = new NiSkinBoneVertData();
                     vertex_weights[i].Read(reader);
                 }
             }
         }
     }
 
-
-    // NiSkinData::BoneVertData. A vertex and its weight.
-    public struct BoneVertData
+    // A vertex and its weight.
+    public struct NiSkinBoneVertData
     {
         // The vertex index, in the mesh.
         ushort index;
@@ -101,17 +100,17 @@ namespace NiDump
         // This optionally links a NiSkinPartition for hardware-acceleration information.
         public bool has_vertex_weights;
         // Contains offset data for each node that this skin is influenced by.
-        public BoneData[] bone_data;
+        public NiSkinBoneData[] bone_data;
 
         public override void Read(BinaryReader reader)
         {
             reader.ReadTransform(out this.transform);
             this.num_bones = reader.ReadUInt32();
             this.has_vertex_weights = reader.ReadByte() != 0;
-            this.bone_data = new BoneData[num_bones];
+            this.bone_data = new NiSkinBoneData[num_bones];
             for (int i = 0; i < num_bones; i++)
             {
-                bone_data[i] = new BoneData();
+                bone_data[i] = new NiSkinBoneData();
                 bone_data[i].Read(reader, has_vertex_weights);
             }
         }
@@ -311,6 +310,137 @@ namespace NiDump
             for (int i = 0; i < num_skin_partitions; i++)
             {
                 skin_partitions[i].Dump();
+            }
+        }
+
+        public override void Write(BinaryWriter writer)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    // Fallout 4 Bone Transform
+    public struct BSSkinBoneTransform
+    {
+        //public NiBound bounding_sphere;
+        // NiBound
+        //
+        // Center of the bounding box (smallest box that contains all vertices) of the mesh.
+        Vector3 center;
+        // Radius of the mesh: maximal Euclidean distance between the center and all vertices.
+        float radius;
+
+        public Matrix3x3 rotation;
+        public Vector3 translation;
+        public float scale;
+
+        public void Read(BinaryReader reader)
+        {
+            reader.ReadVector3(out this.center);
+            this.radius = reader.ReadSingle();
+
+            reader.ReadMatrix3x3(out rotation);
+            reader.ReadVector3(out translation);
+            this.scale = reader.ReadSingle();
+        }
+
+        public void Dump()
+        {
+            System.Console.WriteLine("center:{0}", this.center);
+            System.Console.WriteLine("radius:{0}", this.radius);
+
+            System.Console.WriteLine("rotation:{0}", this.rotation);
+            System.Console.WriteLine("translation:{0}", this.translation);
+            System.Console.WriteLine("scale:{0}", this.scale);
+        }
+
+        public void Write(BinaryWriter writer)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    // Fallout 4 Bone Data
+    public class BSSkinBoneData : NiObject
+    {
+        public uint num_transforms;
+        public BSSkinBoneTransform[] transforms;
+
+        public override void Read(BinaryReader reader)
+        {
+            this.num_transforms = reader.ReadUInt32();
+            this.transforms = new BSSkinBoneTransform[num_transforms];
+            for (int i = 0; i < num_transforms; i++)
+            {
+                transforms[i] = new BSSkinBoneTransform();
+                transforms[i].Read(reader);
+            }
+        }
+
+        public override void Dump()
+        {
+            System.Console.WriteLine("-- BoneData --");
+
+            System.Console.WriteLine("num_transforms:{0}", num_transforms);
+            for (int i = 0; i < num_transforms; i++)
+            {
+                transforms[i].Dump();
+            }
+        }
+
+        public override void Write(BinaryWriter writer)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    // Fallout 4 Skin Instance
+    public class BSSkinInstance : NiObject
+    {
+        public uint skeleton_root; // Ptr to NiAVObject
+        public ObjectRef data;
+        public uint num_bones;
+        public uint[] bones; // array of Ptr to NiNode
+        public uint num_unknown;
+        public Vector3[] unknown;
+
+        public override void Read(BinaryReader reader)
+        {
+            this.skeleton_root = reader.ReadUInt32();
+            this.data = reader.ReadInt32();
+
+            this.num_bones = reader.ReadUInt32();
+            this.bones = new uint[num_bones];
+            for (int i = 0; i < num_bones; i++)
+            {
+                this.bones[i] = reader.ReadUInt32();
+            }
+
+            this.num_unknown = reader.ReadUInt32();
+            this.unknown = new Vector3[num_unknown];
+            for (int i = 0; i < num_unknown; i++)
+            {
+                reader.ReadVector3(out this.unknown[i]);
+            }
+        }
+
+        public override void Dump()
+        {
+            System.Console.WriteLine("-- BSSkinInstance --");
+
+            System.Console.WriteLine("skeleton_root:{0}", skeleton_root);
+            System.Console.WriteLine("data:{0}", data);
+
+            System.Console.WriteLine("num_bones:{0}", num_bones);
+            for (int i = 0; i < num_bones; i++)
+            {
+                System.Console.WriteLine("{0}", bones[i]);
+            }
+
+            System.Console.WriteLine("num_unknown:{0}", num_unknown);
+            for (int i = 0; i < num_unknown; i++)
+            {
+                System.Console.WriteLine("{0}", unknown[i]);
             }
         }
 

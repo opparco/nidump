@@ -70,6 +70,8 @@ namespace NiDumpShape
 
             int bt_BSTriShape = header.GetBlockTypeIdxByName("BSTriShape");
             int bt_BSSubIndexTriShape = header.GetBlockTypeIdxByName("BSSubIndexTriShape");
+            int bt_BSSkinInstance = header.GetBlockTypeIdxByName("BSSkin::Instance");
+            int bt_BSSkinBoneData = header.GetBlockTypeIdxByName("BSSkin::BoneData");
 #if false
             int bt_NiTriShapeData = header.GetBlockTypeIdxByName("NiTriShapeData");
             int bt_BSLightingShaderProperty = header.GetBlockTypeIdxByName("BSLightingShaderProperty");
@@ -95,6 +97,16 @@ namespace NiDumpShape
                     BSSubIndexTriShape triShape = GetObject<BSSubIndexTriShape>(header, i);
                     triShape.Dump();
                     triShapes[i] = triShape;
+                }
+                if (header.blocks[i].type == bt_BSSkinInstance)
+                {
+                    BSSkinInstance instance = GetObject<BSSkinInstance>(header, i);
+                    instance.Dump();
+                }
+                if (header.blocks[i].type == bt_BSSkinBoneData)
+                {
+                    BSSkinBoneData bonedata = GetObject<BSSkinBoneData>(header, i);
+                    bonedata.Dump();
                 }
 #if false
                 if (header.blocks[i].type == bt_NiTriShapeData)
