@@ -330,18 +330,14 @@ namespace NiDump
         // Radius of the mesh: maximal Euclidean distance between the center and all vertices.
         float radius;
 
-        public Matrix3x3 rotation;
-        public Vector3 translation;
-        public float scale;
+        public Transform transform;
 
         public void Read(BinaryReader reader)
         {
             reader.ReadVector3(out this.center);
             this.radius = reader.ReadSingle();
 
-            reader.ReadMatrix3x3(out rotation);
-            reader.ReadVector3(out translation);
-            this.scale = reader.ReadSingle();
+            reader.ReadTransform(out this.transform);
         }
 
         public void Dump()
@@ -349,9 +345,7 @@ namespace NiDump
             System.Console.WriteLine("center:{0}", this.center);
             System.Console.WriteLine("radius:{0}", this.radius);
 
-            System.Console.WriteLine("rotation:{0}", this.rotation);
-            System.Console.WriteLine("translation:{0}", this.translation);
-            System.Console.WriteLine("scale:{0}", this.scale);
+            System.Console.WriteLine("transform:{0}", this.transform);
         }
 
         public void Write(BinaryWriter writer)
@@ -397,23 +391,23 @@ namespace NiDump
     // Fallout 4 Skin Instance
     public class BSSkinInstance : NiObject
     {
-        public uint skeleton_root; // Ptr to NiAVObject
+        public ObjectRef skeleton_root; // Ptr to NiAVObject
         public ObjectRef data;
         public uint num_bones;
-        public uint[] bones; // array of Ptr to NiNode
+        public ObjectRef[] bones; // array of Ptr to NiNode
         public uint num_unknown;
         public Vector3[] unknown;
 
         public override void Read(BinaryReader reader)
         {
-            this.skeleton_root = reader.ReadUInt32();
+            this.skeleton_root = reader.ReadInt32();
             this.data = reader.ReadInt32();
 
             this.num_bones = reader.ReadUInt32();
-            this.bones = new uint[num_bones];
+            this.bones = new ObjectRef[num_bones];
             for (int i = 0; i < num_bones; i++)
             {
-                this.bones[i] = reader.ReadUInt32();
+                this.bones[i] = reader.ReadInt32();
             }
 
             this.num_unknown = reader.ReadUInt32();

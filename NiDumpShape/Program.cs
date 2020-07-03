@@ -105,8 +105,8 @@ namespace NiDumpShape
                 }
                 if (header.blocks[i].type == bt_BSSkinBoneData)
                 {
-                    BSSkinBoneData bonedata = GetObject<BSSkinBoneData>(header, i);
-                    bonedata.Dump();
+                    BSSkinBoneData bone_data = GetObject<BSSkinBoneData>(header, i);
+                    bone_data.Dump();
                 }
 #if false
                 if (header.blocks[i].type == bt_NiTriShapeData)
