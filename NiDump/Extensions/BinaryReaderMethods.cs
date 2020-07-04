@@ -88,11 +88,12 @@ namespace NiDump
             m.M33 = reader.ReadSingle();
         }
 
+        // NiTransform
         public static void ReadTransform(this BinaryReader reader, out Transform t)
         {
             t = new Transform();
-            reader.ReadVector3(out t.translation);
             reader.ReadMatrix3x3(out t.rotation);
+            reader.ReadVector3(out t.translation);
             t.scale = reader.ReadSingle();
         }
 

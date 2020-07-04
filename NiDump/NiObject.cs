@@ -30,6 +30,13 @@ namespace NiDump
             this.scale = scale;
         }
 
+        public Transform(ref Vector3 translation, ref Matrix3x3 rotation, float scale)
+        {
+            this.translation = translation;
+            this.rotation = rotation;
+            this.scale = scale;
+        }
+
         public static Transform operator *(Transform t1, Transform t2)
         {
             return new Transform(
@@ -310,7 +317,11 @@ namespace NiDump
             base.Read(reader);
 
             this.flags = reader.ReadUInt32();
-            reader.ReadTransform(out this.local);
+
+            this.local = new Transform();
+            reader.ReadVector3(out local.translation); // order!
+            reader.ReadMatrix3x3(out local.rotation);
+            local.scale = reader.ReadSingle();
 
             // ref of NiCollisionObject
             this.collision_object = reader.ReadInt32();
@@ -415,13 +426,10 @@ namespace NiDump
         {
             Transform t = new Transform();
             NiNode node = this;
-            //int i = 0;
             while (node != null && node.self_ref != root_ref)
             {
-                //Console.WriteLine(" local loop idx {0} Ref {1}", i, node.self_ref);
                 t = node.local * t;
                 node = node.parent;
-                //i++;
             }
             return t;
         }
