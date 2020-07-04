@@ -87,55 +87,55 @@ namespace NiDumpShape
             {
                 if (header.blocks[i].type == bt_BSTriShape)
                 {
-                    BSTriShape triShape = GetObject<BSTriShape>(header, i);
+                    BSTriShape triShape = header.GetObject<BSTriShape>(i);
                     triShape.Dump();
                     triShapes[i] = triShape;
                 }
                 if (header.blocks[i].type == bt_BSSubIndexTriShape)
                 {
-                    BSSubIndexTriShape triShape = GetObject<BSSubIndexTriShape>(header, i);
+                    BSSubIndexTriShape triShape = header.GetObject<BSSubIndexTriShape>(i);
                     triShape.Dump();
                     triShapes[i] = triShape;
                 }
                 if (header.blocks[i].type == bt_BSSkinInstance)
                 {
-                    BSSkinInstance instance = GetObject<BSSkinInstance>(header, i);
+                    BSSkinInstance instance = header.GetObject<BSSkinInstance>(i);
                     instance.Dump();
                 }
                 if (header.blocks[i].type == bt_BSSkinBoneData)
                 {
-                    BSSkinBoneData bone_data = GetObject<BSSkinBoneData>(header, i);
+                    BSSkinBoneData bone_data = header.GetObject<BSSkinBoneData>(i);
                     bone_data.Dump();
                 }
 #if false
                 if (header.blocks[i].type == bt_NiTriShapeData)
                 {
-                    NiTriShapeData triShapeData = GetObject<NiTriShapeData>(header, i);
+                    NiTriShapeData triShapeData = header.GetObject<NiTriShapeData>(i);
                     triShapeData.Dump();
                 }
                 if (header.blocks[i].type == bt_BSLightingShaderProperty)
                 {
-                    BSLightingShaderProperty lightingShaderProperty = GetObject<BSLightingShaderProperty>(header, i);
+                    BSLightingShaderProperty lightingShaderProperty = header.GetObject<BSLightingShaderProperty>(i);
                     lightingShaderProperty.Dump();
                 }
                 if (header.blocks[i].type == bt_BSShaderTextureSet)
                 {
-                    BSShaderTextureSet shaderTextureSet = GetObject<BSShaderTextureSet>(header, i);
+                    BSShaderTextureSet shaderTextureSet = header.GetObject<BSShaderTextureSet>(i);
                     shaderTextureSet.Dump();
                 }
                 if (header.blocks[i].type == bt_NiSkinInstance)
                 {
-                    NiSkinInstance skinInstance = GetObject<NiSkinInstance>(header, i);
+                    NiSkinInstance skinInstance = header.GetObject<NiSkinInstance>(i);
                     skinInstance.Dump();
                     foreach (ObjectRef boneref in skinInstance.bones)
                     {
-                        NiNode node = GetObject<NiNode>(header, boneref);
+                        NiNode node = header.GetObject<NiNode>(boneref);
                         System.Console.WriteLine(header.strings[node.name]);
                     }
                 }
                 if (header.blocks[i].type == bt_NiSkinPartition)
                 {
-                    NiSkinPartition skinPartition = GetObject<NiSkinPartition>(header, i);
+                    NiSkinPartition skinPartition = header.GetObject<NiSkinPartition>(i);
                     skinPartition.Dump();
                 }
 #endif
@@ -358,24 +358,6 @@ namespace NiDumpShape
                 }
                 writer.WriteLine("Eof");
             }
-        }
-
-        //TODO: nif
-
-        static T GetObject<T>(NiHeader header, ObjectRef object_ref) where T : NiObject, new()
-        {
-            //TODO: cmp T and header.block_types[object_ref]
-
-            T instance;
-
-            using (MemoryStream stream = new MemoryStream(header.blocks[object_ref].data))
-            {
-                BinaryReader reader = new BinaryReader(stream, System.Text.Encoding.Default);
-
-                instance = new T();
-                instance.Read(reader);
-            }
-            return instance;
         }
     }
 }
