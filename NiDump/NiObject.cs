@@ -110,9 +110,9 @@ namespace NiDump
     // List of three vertex indices.
     public struct Triangle
     {
-        ushort v1;
-        ushort v2;
-        ushort v3;
+        public ushort v1;
+        public ushort v2;
+        public ushort v3;
 
         public void Read(BinaryReader reader)
         {

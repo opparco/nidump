@@ -326,9 +326,9 @@ namespace NiDump
         // NiBound
         //
         // Center of the bounding box (smallest box that contains all vertices) of the mesh.
-        Vector3 center;
+        public Vector3 center;
         // Radius of the mesh: maximal Euclidean distance between the center and all vertices.
-        float radius;
+        public float radius;
 
         public Transform transform;
 

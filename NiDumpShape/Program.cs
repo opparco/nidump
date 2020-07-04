@@ -31,6 +31,7 @@ namespace NiDumpShape
                 Program program = new Program();
                 Console.WriteLine("processing " + file);
                 program.Load(file);
+                program.SaveMqoFile("out.mqo");
                 //if (program.UpdateTriShapes())
                 //    program.Save(dest_file);
             }
@@ -38,7 +39,7 @@ namespace NiDumpShape
 
         NiHeader header;
         NiFooter footer;
-        Dictionary<ObjectRef, BSSubIndexTriShape> triShapes;
+        Dictionary<ObjectRef, BSTriShape> triShapes;
 
         public void Load(string source_file)
         {
@@ -80,18 +81,16 @@ namespace NiDumpShape
             int bt_NiSkinPartition = header.GetBlockTypeIdxByName("NiSkinPartition");
 #endif
 
-            triShapes = new Dictionary<ObjectRef, BSSubIndexTriShape>();
+            triShapes = new Dictionary<ObjectRef, BSTriShape>();
 
             for (int i = 0; i < num_blocks; i++)
             {
-#if false
                 if (header.blocks[i].type == bt_BSTriShape)
                 {
                     BSTriShape triShape = GetObject<BSTriShape>(header, i);
                     triShape.Dump();
                     triShapes[i] = triShape;
                 }
-#endif
                 if (header.blocks[i].type == bt_BSSubIndexTriShape)
                 {
                     BSSubIndexTriShape triShape = GetObject<BSSubIndexTriShape>(header, i);
@@ -143,6 +142,7 @@ namespace NiDumpShape
             }
         }
 
+#if false
         bool UpdateTriShapes()
         {
             bool updated = false;
@@ -273,6 +273,7 @@ namespace NiDumpShape
             }
             return updated;
         }
+#endif
 
         public void Save(string dest_file)
         {
@@ -289,7 +290,7 @@ namespace NiDumpShape
             int num_blocks = header.blocks.Length;
             for (int i = 0; i < num_blocks; i++)
             {
-                BSSubIndexTriShape triShape;
+                BSTriShape triShape;
                 if (triShapes.TryGetValue(i, out triShape))
                     triShape.Write(writer);
                 else
@@ -297,6 +298,66 @@ namespace NiDumpShape
             }
 
             footer.Write(writer);
+        }
+
+        public string GetString(StringRef string_ref)
+        {
+            return string_ref != -1 ? header.strings[string_ref] : "(undefined)";
+        }
+
+        void SaveMqoFile(string path)
+        {
+            using (StreamWriter writer = new StreamWriter(path))
+            {
+                writer.WriteLine("Metasequoia Document");
+                writer.WriteLine("Format Text Ver 1.0");
+                writer.WriteLine("");
+                writer.WriteLine("Scene {");
+                writer.WriteLine("\tpos 0 0 1500");
+                writer.WriteLine("\tlookat 0 0 0");
+                writer.WriteLine("\thead -0.5236");
+                writer.WriteLine("\tpich 0.5236");
+                writer.WriteLine("\tortho 1");
+                writer.WriteLine("\tzoom2 5.0000");
+                writer.WriteLine("\tamb 0.250 0.250 0.250");
+                writer.WriteLine("}");
+                writer.WriteLine("Material 1 {");
+                writer.WriteLine("\t\"mat1\" col(1.000 1.000 1.000 1.000) dif(0.800) amb(0.600) emi(0.000) spc(0.000) power(5.00) tex(\"mat1.png\")");
+                writer.WriteLine("}");
+                foreach (ObjectRef triShape_ref in triShapes.Keys)
+                {
+                    BSTriShape triShape = triShapes[triShape_ref];
+
+                    if (triShape.data_size == 0)
+                        continue;
+
+                    writer.WriteLine("Object \"{0}\" {{", GetString(triShape.name));
+                    writer.WriteLine("\tvisible 15");
+                    writer.WriteLine("\tlocking 0");
+                    writer.WriteLine("\tshading 1");
+                    writer.WriteLine("\tfacet 59.5");
+                    writer.WriteLine("\tcolor 0.898 0.498 0.698");
+                    writer.WriteLine("\tcolor_type 0");
+                    writer.WriteLine("\tvertex {0} {{", triShape.num_vertices);
+                    foreach (BSVertexData vd in triShape.vertex_data)
+                    {
+                        writer.WriteLine("\t\t{0:F4} {1:F4} {2:F4}", vd.vertex.X, vd.vertex.Y, vd.vertex.Z);
+                    }
+                    writer.WriteLine("\t}");
+                    writer.WriteLine("\tface {0} {{", triShape.num_triangles);
+                    foreach (Triangle triangle in triShape.triangles)
+                    {
+                        BSVertexData v1, v2, v3;
+                        v1 = triShape.vertex_data[triangle.v1];
+                        v2 = triShape.vertex_data[triangle.v2];
+                        v3 = triShape.vertex_data[triangle.v3];
+                        writer.WriteLine("\t\t3 V({0} {2} {1}) M({3}) UV({4:F5} {5:F5} {8:F5} {9:F5} {6:F5} {7:F5})", triangle.v1, triangle.v2, triangle.v3, 0, v1.uv.X, v1.uv.Y, v2.uv.X, v2.uv.Y, v3.uv.X, v3.uv.Y);
+                    }
+                    writer.WriteLine("\t}");
+                    writer.WriteLine("}");
+                }
+                writer.WriteLine("Eof");
+            }
         }
 
         //TODO: nif
