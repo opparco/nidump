@@ -39,10 +39,12 @@ namespace NiDump
 
         public static Transform operator *(Transform t1, Transform t2)
         {
-            return new Transform(
-                t1.translation + Vector3.Transform(t2.translation, t1.rotation) * t1.scale,
-                t1.rotation * t2.rotation,
-                t1.scale * t2.scale);
+            return new Transform(t1 * t2.translation, t1.rotation * t2.rotation, t1.scale * t2.scale);
+        }
+
+        public static Vector3 operator *(Transform t1, Vector3 v2)
+        {
+            return t1.translation + Vector3.Transform(v2, t1.rotation) * t1.scale;
         }
 
         public void Dump()
