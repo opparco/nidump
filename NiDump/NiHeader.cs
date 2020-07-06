@@ -189,7 +189,7 @@ namespace NiDump
         }
 
         // 特定の string を探索する
-        public int GetStringIdxByName(string name)
+        public int GetStringRefByName(string name)
         {
             int num_strings = this.strings.Length;
 

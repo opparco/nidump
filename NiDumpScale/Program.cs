@@ -31,7 +31,7 @@ namespace NiDumpScale
         NiHeader header;
         NiFooter footer;
         NiNode[] nodes;
-        int root_node_ref = -1;
+        int root_ref = -1;
 
         public void Load(string source_file)
         {
@@ -72,29 +72,29 @@ namespace NiDumpScale
                 }
             }
 
-            //int string_root = header.GetStringIdxByName("NPC Root [Root]");
+            //StringRef string_root = header.GetStringRefByName("NPC Root [Root]");
             //Console.WriteLine("String idx 'NPC Root [Root]': {0}", string_root);
-            int string_root = header.GetStringIdxByName("Root");
-            Console.WriteLine("String idx 'Root': {0}", string_root);
+            StringRef root_name_ref = header.GetStringRefByName("Root");
+            Console.WriteLine("String ref 'Root': {0}", root_name_ref);
 
-            root_node_ref = -1;
+            root_ref = -1;
             for (int i = 0; i < num_blocks; i++)
             {
                 NiNode node = nodes[i];
                 if (node == null)
                     continue;
 
-                if (node.name == string_root)
+                if (node.name == root_name_ref)
                 {
-                    root_node_ref = i;
+                    root_ref = i;
                     break;
                 }
             }
-            //Console.WriteLine("root_node_ref 'NPC Root [Root]': {0}", root_node_ref);
-            Console.WriteLine("root_node_ref 'Root': {0}", root_node_ref);
-            SetNodeRefParent(root_node_ref, null);
+            //Console.WriteLine("root_ref 'NPC Root [Root]': {0}", root_node_ref);
+            Console.WriteLine("root_ref 'Root': {0}", root_ref);
+            SetNodeRefParent(root_ref, null);
 
-            DumpNodeRef(root_node_ref);
+            DumpNodeRef(root_ref);
         }
 
         public void SetNodeRefParent(ObjectRef node_ref, NiNode parent)
