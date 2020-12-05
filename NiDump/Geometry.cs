@@ -371,14 +371,57 @@ namespace NiDump
 
     public class BSVertexDesc
     {
-        public byte vf1;
-        public byte vf2;
-        public byte vf3;
-        public byte vf4;
-        public byte vf5;
-        public byte vf6;
-        public byte vf7;
-        public byte vf8;
+        [Flags]
+        enum VertexFlags : ushort
+        {
+            //
+            //
+            //
+            //
+
+            vertex = (1 << 4),
+            uvs = (1 << 5),
+            uvs_2 = (1 << 6),
+            normals = (1 << 7),
+
+            tangents = (1 << 8),
+            vertex_colors = (1 << 9),
+            skinned = (1 << 10),
+            land_data = (1 << 11),
+
+            eye_data = (1 << 12),
+            instance = (1 << 13),
+            full_precision = (1 << 14),
+            //
+        }
+
+        byte vf1;
+        byte vf2;
+        byte vf3;
+        byte vf4;
+        byte vf5;
+        VertexFlags vertex_attributes;
+        byte vf8;
+
+        //
+        //
+        //
+        //
+
+        public bool has_vertex { get { return this.vertex_attributes.HasFlag(VertexFlags.vertex); }}
+        public bool has_uvs { get { return this.vertex_attributes.HasFlag(VertexFlags.uvs); }}
+        public bool has_uvs_2 { get { return this.vertex_attributes.HasFlag(VertexFlags.uvs_2); }}
+        public bool has_normals { get { return this.vertex_attributes.HasFlag(VertexFlags.normals); }}
+
+        public bool has_tangents { get { return this.vertex_attributes.HasFlag(VertexFlags.tangents); }}
+        public bool has_vertex_colors { get { return this.vertex_attributes.HasFlag(VertexFlags.vertex_colors); }}
+        public bool skinned { get { return this.vertex_attributes.HasFlag(VertexFlags.skinned); }}
+        public bool land_data { get { return this.vertex_attributes.HasFlag(VertexFlags.land_data); }}
+
+        public bool eye_data { get { return this.vertex_attributes.HasFlag(VertexFlags.eye_data); }}
+        public bool instance { get { return this.vertex_attributes.HasFlag(VertexFlags.instance); }}
+        public bool full_precision { get { return this.vertex_attributes.HasFlag(VertexFlags.full_precision); }}
+        //
 
         public void Read(BinaryReader reader)
         {
@@ -387,8 +430,7 @@ namespace NiDump
             this.vf3 = reader.ReadByte();
             this.vf4 = reader.ReadByte();
             this.vf5 = reader.ReadByte();
-            this.vf6 = reader.ReadByte();
-            this.vf7 = reader.ReadByte();
+            this.vertex_attributes = (VertexFlags)reader.ReadUInt16();
             this.vf8 = reader.ReadByte();
         }
 
@@ -399,18 +441,31 @@ namespace NiDump
             writer.Write(vf3);
             writer.Write(vf4);
             writer.Write(vf5);
-            writer.Write(vf6);
-            writer.Write(vf7);
+            writer.Write((ushort)vertex_attributes);
             writer.Write(vf8);
+        }
+
+        public void Dump()
+        {
+            Console.WriteLine("-- BSVertexDesc --");
+
+            Console.WriteLine("vertex_attributes: {0}", this.vertex_attributes);
         }
     }
 
     public class BSVertexData
     {
+#if false
         // cond: vertex
         public Half3 vertex;
         // cond: vertex
         public Half bitangent_x; // not byte
+#endif
+
+        // cond: vertex
+        public Vector3 vertex;
+        // cond: vertex
+        public float bitangent_x; // not byte
 
         // cond: uvs
         public Half2 uv;
@@ -438,35 +493,65 @@ namespace NiDump
         public Half[] bone_weights;
         public byte[] bone_indices;
 
-        public void Read(BinaryReader reader)
+        // cond: eye_data
+        public float eye_data;
+
+        public void Read(BinaryReader reader, BSVertexDesc vertex_desc)
         {
-            reader.ReadHalf3(out this.vertex);
-            this.bitangent_x = new Half(reader.ReadUInt16());
-
-            reader.ReadHalf2(out this.uv);
-
-            this.normal_x = reader.ReadByte();
-            this.normal_y = reader.ReadByte();
-            this.normal_z = reader.ReadByte();
-            this.bitangent_y = reader.ReadByte();
-
-            this.tangent_x = reader.ReadByte();
-            this.tangent_y = reader.ReadByte();
-            this.tangent_z = reader.ReadByte();
-            this.bitangent_z = reader.ReadByte();
-
-            //TODO: vertex_colors
-
-            this.bone_weights = new Half[4];
-            for (int i = 0; i < 4; i++)
+            if (vertex_desc.has_vertex)
             {
-                bone_weights[i] = new Half(reader.ReadUInt16());
+#if false
+                reader.ReadHalf3(out this.vertex);
+                this.bitangent_x = new Half(reader.ReadUInt16());
+#endif
+                reader.ReadVector3(out this.vertex);
+                this.bitangent_x = reader.ReadSingle();
             }
-            this.bone_indices = new byte[4];
-            for (int i = 0; i < 4; i++)
+
+            if (vertex_desc.has_uvs)
+                reader.ReadHalf2(out this.uv);
+
+            if (vertex_desc.has_normals)
             {
-                bone_indices[i] = reader.ReadByte();
+                this.normal_x = reader.ReadByte();
+                this.normal_y = reader.ReadByte();
+                this.normal_z = reader.ReadByte();
+                this.bitangent_y = reader.ReadByte();
+
+                if (vertex_desc.has_tangents)
+                {
+                    this.tangent_x = reader.ReadByte();
+                    this.tangent_y = reader.ReadByte();
+                    this.tangent_z = reader.ReadByte();
+                    this.bitangent_z = reader.ReadByte();
+                }
             }
+
+            if (vertex_desc.has_vertex_colors)
+            {
+                byte r = reader.ReadByte();
+                byte g = reader.ReadByte();
+                byte b = reader.ReadByte();
+                byte a = reader.ReadByte();
+                this.vertex_colors = new ColorBGRA(r, g, b, a);
+            }
+
+            if (vertex_desc.skinned)
+            {
+                this.bone_weights = new Half[4];
+                for (int i = 0; i < 4; i++)
+                {
+                    bone_weights[i] = new Half(reader.ReadUInt16());
+                }
+                this.bone_indices = new byte[4];
+                for (int i = 0; i < 4; i++)
+                {
+                    bone_indices[i] = reader.ReadByte();
+                }
+            }
+
+            if (vertex_desc.eye_data)
+                this.eye_data = reader.ReadSingle();
         }
 
         public void Dump()
@@ -488,7 +573,10 @@ namespace NiDump
         public void Write(BinaryWriter writer)
         {
             writer.Write(ref this.vertex);
+#if false
             writer.Write(this.bitangent_x.RawValue);
+#endif
+            writer.Write(this.bitangent_x);
 
             writer.Write(ref this.uv);
 
@@ -559,7 +647,7 @@ namespace NiDump
                 for (int i = 0; i < num_vertices; i++)
                 {
                     vertex_data[i] = new BSVertexData();
-                    vertex_data[i].Read(reader);
+                    vertex_data[i].Read(reader, this.vertex_desc);
                 }
                 this.triangles = new Triangle[num_triangles];
                 for (int i = 0; i < num_triangles; i++)

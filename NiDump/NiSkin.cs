@@ -170,6 +170,10 @@ namespace NiDump
         // Unknown.
         ushort unknown;
 
+        // cond: userver2 == 100
+        BSVertexDesc vertex_desc;
+        Triangle[] triangles_copied;
+
         public void Read(BinaryReader reader)
         {
             this.num_vertices = reader.ReadUInt16();
@@ -177,6 +181,14 @@ namespace NiDump
             this.num_bones = reader.ReadUInt16();
             this.num_strips = reader.ReadUInt16();
             this.num_weights_per_vertex = reader.ReadUInt16();
+
+            System.Console.WriteLine("-- [DEBUG] SkinPartition --");
+
+            System.Console.WriteLine("num_vertices:{0}", num_vertices);
+            System.Console.WriteLine("num_triangles:{0}", num_triangles);
+            System.Console.WriteLine("num_bones:{0}", num_bones);
+            System.Console.WriteLine("num_strips:{0}", num_strips);
+            System.Console.WriteLine("num_weights_per_vertex:{0}", num_weights_per_vertex);
 
             // read bones
             this.bones = new ushort[num_bones];
@@ -263,6 +275,17 @@ namespace NiDump
                 }
             }
             this.unknown = reader.ReadUInt16();
+
+            // cond: userver2 == 100
+            this.vertex_desc = new BSVertexDesc();
+            this.vertex_desc.Read(reader);
+
+            this.triangles_copied = new Triangle[num_triangles];
+            for (int i = 0; i < num_triangles; i++)
+            {
+                triangles_copied[i] = new Triangle();
+                triangles_copied[i].Read(reader);
+            }
         }
 
         public void Dump()
@@ -280,6 +303,8 @@ namespace NiDump
             System.Console.WriteLine("has_faces:{0}", has_faces);
             System.Console.WriteLine("has_bone_indices:{0}", has_bone_indices);
             System.Console.WriteLine("unknown:{0}", unknown);
+
+            vertex_desc.Dump();
         }
     }
 
@@ -288,12 +313,38 @@ namespace NiDump
     {
 
         public uint num_skin_partitions;
+#if false
+        // cond: userver2 != 100
         // Skin partition objects.
+        public SkinPartition[] skin_partitions;
+#endif
+        // cond: userver2 == 100
+        public uint data_size;
+        public uint vertex_size;
+        public BSVertexDesc vertex_desc;
+        public BSVertexData[] vertex_data;
         public SkinPartition[] skin_partitions;
 
         public override void Read(BinaryReader reader)
         {
             this.num_skin_partitions = reader.ReadUInt32();
+            this.data_size = reader.ReadUInt32();
+            this.vertex_size = reader.ReadUInt32();
+
+            this.vertex_desc = new BSVertexDesc();
+            this.vertex_desc.Read(reader);
+
+            if (data_size != 0)
+            {
+                uint num_vertices = this.data_size / this.vertex_size;
+                this.vertex_data = new BSVertexData[num_vertices];
+                for (int i = 0; i < num_vertices; i++)
+                {
+                    vertex_data[i] = new BSVertexData();
+                    vertex_data[i].Read(reader, this.vertex_desc);
+                }
+            }
+
             this.skin_partitions = new SkinPartition[num_skin_partitions];
             for (int i = 0; i < num_skin_partitions; i++)
             {
@@ -307,6 +358,11 @@ namespace NiDump
             System.Console.WriteLine("-- NiSkinPartition --");
 
             System.Console.WriteLine("num_skin_partitions:{0}", num_skin_partitions);
+            System.Console.WriteLine("data_size:{0}", data_size);
+            System.Console.WriteLine("vertex_size:{0}", vertex_size);
+
+            vertex_desc.Dump();
+
             for (int i = 0; i < num_skin_partitions; i++)
             {
                 skin_partitions[i].Dump();
