@@ -182,14 +182,6 @@ namespace NiDump
             this.num_strips = reader.ReadUInt16();
             this.num_weights_per_vertex = reader.ReadUInt16();
 
-            System.Console.WriteLine("-- [DEBUG] SkinPartition --");
-
-            System.Console.WriteLine("num_vertices:{0}", num_vertices);
-            System.Console.WriteLine("num_triangles:{0}", num_triangles);
-            System.Console.WriteLine("num_bones:{0}", num_bones);
-            System.Console.WriteLine("num_strips:{0}", num_strips);
-            System.Console.WriteLine("num_weights_per_vertex:{0}", num_weights_per_vertex);
-
             // read bones
             this.bones = new ushort[num_bones];
             for (int i = 0; i < num_bones; i++)
