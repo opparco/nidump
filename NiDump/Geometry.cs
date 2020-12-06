@@ -618,12 +618,19 @@ namespace NiDump
 
         public BSVertexDesc vertex_desc;
 
-        public uint num_triangles;
+        // fo4: uint
+        //public uint num_triangles;
+        public ushort num_triangles;
         public ushort num_vertices;
         public uint data_size;
 
         public BSVertexData[] vertex_data;
         public Triangle[] triangles;
+
+        // cond: userver2 == 100
+        public uint particle_data_size;
+        public Vector3[] particle_vertices;
+        public Triangle[] particle_triangles;
 
         public override void Read(BinaryReader reader)
         {
@@ -637,7 +644,9 @@ namespace NiDump
             this.alpha_property = reader.ReadInt32();
             this.vertex_desc = new BSVertexDesc();
             this.vertex_desc.Read(reader);
-            this.num_triangles = reader.ReadUInt32();
+            // fo4: uint
+            //this.num_triangles = reader.ReadUInt32();
+            this.num_triangles = reader.ReadUInt16();
             this.num_vertices = reader.ReadUInt16();
             this.data_size = reader.ReadUInt32();
 
@@ -650,6 +659,23 @@ namespace NiDump
                     vertex_data[i].Read(reader, this.vertex_desc);
                 }
                 this.triangles = new Triangle[num_triangles];
+                for (int i = 0; i < num_triangles; i++)
+                {
+                    triangles[i] = new Triangle();
+                    triangles[i].Read(reader);
+                }
+            }
+
+            this.particle_data_size = reader.ReadUInt32();
+
+            if (particle_data_size != 0)
+            {
+                this.particle_vertices = new Vector3[num_vertices];
+                for (int i = 0; i < num_vertices; i++)
+                {
+                    reader.ReadVector3(out particle_vertices[i]);
+                }
+                this.particle_triangles = new Triangle[num_triangles];
                 for (int i = 0; i < num_triangles; i++)
                 {
                     triangles[i] = new Triangle();
@@ -676,6 +702,8 @@ namespace NiDump
             {
                 vertex_data[0].Dump();
             }
+
+            Console.WriteLine("particle_data_size:{0}", particle_data_size);
         }
 
         public override void Write(BinaryWriter writer)
@@ -838,6 +866,31 @@ namespace NiDump
             {
                 writer.Write(this.cut_offsets[i]);
             }
+        }
+    }
+
+    public class BSDynamicTriShape : BSTriShape
+    {
+        public uint vertex_data_size;
+        public Vector4[] vertices;
+
+        public override void Read(BinaryReader reader)
+        {
+            base.Read(reader);
+
+            this.vertex_data_size = reader.ReadUInt32();
+            if (this.vertex_data_size > 0)
+            {
+                this.vertices = new Vector4[num_vertices];
+                for (int i = 0; i < num_vertices; i++)
+                {
+                    reader.ReadVector4(out vertices[i]);
+                }
+            }
+            Console.WriteLine("-- BSDynamicTriShape --");
+
+            Console.WriteLine("Vertex Data Size: {0}", this.vertex_data_size);
+            Console.WriteLine("num vertices: {0}", this.vertices.Length);
         }
     }
 
