@@ -171,8 +171,8 @@ namespace NiDump
         ushort unknown;
 
         // cond: userver2 == 100
-        BSVertexDesc vertex_desc;
-        Triangle[] triangles_copied;
+        public BSVertexDesc vertex_desc;
+        public Triangle[] triangles_copied;
 
         public void Read(BinaryReader reader)
         {
@@ -413,17 +413,17 @@ namespace NiDump
     // Fallout 4 Bone Data
     public class BSSkinBoneData : NiObject
     {
-        public uint num_transforms;
-        public BSSkinBoneTransform[] transforms;
+        public uint num_bones;
+        public BSSkinBoneTransform[] bones;
 
         public override void Read(BinaryReader reader)
         {
-            this.num_transforms = reader.ReadUInt32();
-            this.transforms = new BSSkinBoneTransform[num_transforms];
-            for (int i = 0; i < num_transforms; i++)
+            this.num_bones = reader.ReadUInt32();
+            this.bones = new BSSkinBoneTransform[num_bones];
+            for (int i = 0; i < num_bones; i++)
             {
-                transforms[i] = new BSSkinBoneTransform();
-                transforms[i].Read(reader);
+                bones[i] = new BSSkinBoneTransform();
+                bones[i].Read(reader);
             }
         }
 
@@ -431,10 +431,10 @@ namespace NiDump
         {
             System.Console.WriteLine("-- BoneData --");
 
-            System.Console.WriteLine("num_transforms:{0}", num_transforms);
-            for (int i = 0; i < num_transforms; i++)
+            System.Console.WriteLine("num_bones:{0}", num_bones);
+            for (int i = 0; i < num_bones; i++)
             {
-                transforms[i].Dump();
+                bones[i].Dump();
             }
         }
 
